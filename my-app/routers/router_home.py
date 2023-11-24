@@ -6,19 +6,19 @@ from mysql.connector.errors import Error
 # Importando cenexión a BD
 from controllers.funciones_home import *
 
-PATH_URL = "public/empleados"
+PATH_URL = "public/vehiculos"
 
 
-@app.route('/registrar-empleado', methods=['GET'])
-def viewFormEmpleado():
+@app.route('/registrar-vehiculo', methods=['GET'])
+def viewFormVehiculo():
     if 'conectado' in session:
-        return render_template(f'{PATH_URL}/form_empleado.html')
+        return render_template(f'{PATH_URL}/form_vehiculo.html')
     else:
         flash('primero debes iniciar sesión.', 'error')
         return redirect(url_for('inicio'))
 
 
-@app.route('/form-registrar-empleado', methods=['POST'])
+@app.route('/form-registrar-vehiculo', methods=['POST'])
 def formEmpleado():
     if 'conectado' in session:
         if 'foto_empleado' in request.files:
