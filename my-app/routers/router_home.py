@@ -21,9 +21,8 @@ def viewFormVehiculo():
 @app.route('/form-registrar-vehiculo', methods=['POST'])
 def formVehiculo():
     if 'conectado' in session:
-        if 'foto_duenio' in request.files:
-            foto_perfil = request.files['foto_duenio']
-            resultado = procesar_form_vehiculo(request.form, foto_perfil)
+        
+            resultado = procesar_form_vehiculo(request.form)
             if resultado > 0:  # Verifica si se insertó al menos una fila en la base de datos
                 return redirect(url_for('lista_vehiculos'))
             else:
@@ -109,19 +108,28 @@ def borrarUsuario(id):
         return redirect(url_for('usuarios'))
 
 
-@app.route('/borrar-vehiculo/<string:id_vehiculo>/<string:foto_duenio>', methods=['GET'])
-def borrarVehiculo(id_vehiculo, foto_duenio):
-    resp = eliminarVehiculo(id_vehiculo, foto_duenio)
-    if resp > 0:
-        flash('El vehículo fue eliminado correctamente', 'success')
-    elif resp == 0:
-        flash('El vehículo no se pudo eliminar', 'error')
-    else:
-        flash('Ocurrió un error al intentar eliminar el vehículo', 'error')
+# @app.route('/borrar-vehiculo/<string:id_vehiculo>/<string:foto_duenio>', methods=['GET'])
+# def borrarVehiculo(id_vehiculo, foto_duenio):
+#     resp = eliminarVehiculo(id_vehiculo, foto_duenio)
+#     if resp > 0:
+#         flash('El vehículo fue eliminado correctamente', 'success')
+        
+#     elif resp == 0:
+#         flash('El vehículo no se pudo eliminar', 'error')
+#     else:
+#         flash('Ocurrió un error al intentar eliminar el vehículo', 'error')
     
-    return redirect(url_for('lista_vehiculos'))
+#     return redirect(url_for('lista_vehiculos'))
 
 
+@app.route('/borrar-vehiculo/<string:id_vehiculo>', methods=['GET'])
+def borrarVehiculo(id_vehiculo):
+    resp = eliminarVehiculo(id_vehiculo)
+    if resp:
+        flash('El Vehiculo fue eliminado correctamente', 'success')
+        return redirect(url_for('lista_vehiculos'))
+
+    
 
 @app.route("/descargar-informe-empleados/", methods=['GET'])
 def reporteBD():

@@ -73,13 +73,13 @@
                 </a>
                 <a
                   href="#"
-                  onclick="eliminarVehiculo('{{ vehiculo.id_vehiculo }}','{{ vehiculo.foto_duenio }}');"
+                  onclick="eliminarVehiculo('{{ vehiculo.id_vehiculo }}');"
                   class="btn btn-danger btn-sm"
                   data-bs-toggle="tooltip"
                   data-bs-offset="0,4"
                   data-bs-placement="top"
                   data-bs-html="true"
-                  title="<span>Eliminar vehiculo {{ vehiculo.foto_duenio }}</span>">
+                  title="<span>Eliminar vehiculo {{ vehiculo.nombre_duenio }}</span>">
                   <i class="bi bi-trash3"></i>
                   Eliminar
                 </a>
@@ -98,9 +98,9 @@
 
 {% block customJS %}
 <script>
-  function eliminarVehiculo(id_vehiculo, foto_duenio) {
+  function eliminarVehiculo(id_vehiculo) {
   if (confirm("¿Estas seguro que deseas Eliminar el vehiculo?")) {
-    let url = `/borrar-vehiculo/${id_vehiculo}/${foto_duenio}`;
+    let url = `/borrar-vehiculo/${id_vehiculo}`;
     if (url) {
       window.location.href = url;
     }

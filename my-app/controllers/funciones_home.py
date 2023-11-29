@@ -21,13 +21,13 @@ from flask import send_file
 # Creamos un objeto Lock para sincronizar el acceso a la conexión a la base de datos
 lock = threading.Lock()
 
-def procesar_form_vehiculo(dataForm, foto_perfil):
+def procesar_form_vehiculo(dataForm):
     # Formateando Salario
     #salario_sin_puntos = re.sub('[^0-9]+', '', dataForm['salario_empleado'])
     # Convertir salario a INT
     #salario_entero = int(salario_sin_puntos)
 
-    result_foto_perfil = procesar_imagen_perfil(foto_perfil)
+    #result_foto_perfil = procesar_imagen_perfil(foto_perfil)
 
     resultado_insert = -1  # Valor predeterminado en caso de error
 
@@ -39,7 +39,7 @@ def procesar_form_vehiculo(dataForm, foto_perfil):
                     sql = "INSERT INTO tbl_vehiculos (nombre_duenio, sexo_duenio, marca_auto, modelo_auto, factura, tarjeta_circulacion, email_duenio, foto_duenio) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
 
                     valores = (dataForm['nombre_duenio'], dataForm['sexo_duenio'], dataForm['marca_auto'],
-                               dataForm['modelo_auto'], dataForm['factura'], dataForm['tarjeta_circulacion'],dataForm['email_duenio'], result_foto_perfil)
+                               dataForm['modelo_auto'], dataForm['factura'], dataForm['tarjeta_circulacion'],dataForm['email_duenio'], dataForm['foto_duenio'])
                     
                     with lock:
                         cursor.execute(sql, valores)
@@ -378,29 +378,49 @@ def lista_usuariosBD():
 
 
 # Eliminar uEmpleado
-def eliminarVehiculo(id_vehiculo, foto_duenio):
+# def eliminarVehiculo(id_vehiculo, foto_duenio):
+#     try:
+#         with connectionBD() as conexion_MySQLdb:
+#             with conexion_MySQLdb.cursor(dictionary=True) as cursor:
+#                 querySQL = "DELETE FROM tbl_vehiculos WHERE id_vehiculo=%s"
+#                 cursor.execute(querySQL, (id_vehiculo,))
+#                 conexion_MySQLdb.commit()
+#                 resultado_eliminar = cursor.rowcount
+
+#                 if resultado_eliminar:
+#                     # Eliminadon foto_empleado desde el directorio
+#                     basepath = path.dirname(__file__)
+#                     url_File = path.join(
+#                         basepath, '../static/fotos_empleados', foto_duenio)
+
+#                     if path.exists(url_File):
+#                         remove(url_File)  # Borrar foto desde la carpeta
+
+#         return resultado_eliminar
+#     except Exception as e:
+#         print(f"Error en eliminarEmpleado : {e}")
+#         return []
+
+def eliminarVehiculo(id_vehiculo):
     try:
         with connectionBD() as conexion_MySQLdb:
             with conexion_MySQLdb.cursor(dictionary=True) as cursor:
                 querySQL = "DELETE FROM tbl_vehiculos WHERE id_vehiculo=%s"
-                cursor.execute(querySQL, (id_vehiculo,foto_duenio))
+                cursor.execute(querySQL, (id_vehiculo,))
                 conexion_MySQLdb.commit()
                 resultado_eliminar = cursor.rowcount
 
-                if resultado_eliminar:
-                    # Eliminadon foto_empleado desde el directorio
-                    basepath = path.dirname(__file__)
-                    url_File = path.join(
-                        basepath, '../static/fotos_empleados', foto_duenio)
-
-                    if path.exists(url_File):
-                        remove(url_File)  # Borrar foto desde la carpeta
-
-        return resultado_eliminar
+        if resultado_eliminar > 0:
+            return resultado_eliminar
+        else:
+            return -1  # Devolver un valor que indique que no se eliminó ningún registro
     except Exception as e:
-        print(f"Error en eliminarEmpleado : {e}")
-        return []
+        print(f"Error en eliminarVehiculo: {e}")
+        raise  # Relanzar la excepción para que la vista de Flask pueda manejarla
 
+
+
+    
 
 # Eliminar usuario
 def eliminarUsuario(id):
@@ -416,3 +436,15 @@ def eliminarUsuario(id):
     except Exception as e:
         print(f"Error en eliminarUsuario : {e}")
         return []
+
+
+
+
+
+
+
+
+
+
+
+
