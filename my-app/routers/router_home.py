@@ -24,14 +24,15 @@ def formEmpleado():
         if 'foto_empleado' in request.files:
             foto_perfil = request.files['foto_empleado']
             resultado = procesar_form_empleado(request.form, foto_perfil)
-            if resultado:
+            if resultado > 0:  # Verifica si se insertó al menos una fila en la base de datos
                 return redirect(url_for('lista_empleados'))
             else:
                 flash('El empleado NO fue registrado.', 'error')
                 return render_template(f'{PATH_URL}/form_empleado.html')
     else:
-        flash('primero debes iniciar sesión.', 'error')
+        flash('Primero debes iniciar sesión.', 'error')
         return redirect(url_for('inicio'))
+
 
 
 @app.route('/lista-de-empleados', methods=['GET'])
@@ -44,6 +45,7 @@ def lista_empleados():
 
 
 @app.route("/detalles-empleado/", methods=['GET'])
+
 @app.route("/detalles-empleado/<int:idEmpleado>", methods=['GET'])
 def detalleEmpleado(idEmpleado=None):
     if 'conectado' in session:
