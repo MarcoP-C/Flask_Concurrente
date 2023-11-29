@@ -94,3 +94,17 @@
 </div>
 
 {% endblock %}
+
+
+{% block customJS %}
+<script>
+  function eliminarVehiculo(id_vehiculo, foto_duenio) {
+  if (confirm("¿Estas seguro que deseas Eliminar el vehiculo?")) {
+    let url = `/borrar-vehiculo/${id_vehiculo}/${foto_duenio}`;
+    if (url) {
+      window.location.href = url;
+    }
+  }
+}
+</script>
+{% endblock %}

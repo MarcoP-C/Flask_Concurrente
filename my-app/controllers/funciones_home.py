@@ -383,7 +383,7 @@ def eliminarVehiculo(id_vehiculo, foto_duenio):
         with connectionBD() as conexion_MySQLdb:
             with conexion_MySQLdb.cursor(dictionary=True) as cursor:
                 querySQL = "DELETE FROM tbl_vehiculos WHERE id_vehiculo=%s"
-                cursor.execute(querySQL, (id_vehiculo,))
+                cursor.execute(querySQL, (id_vehiculo,foto_duenio))
                 conexion_MySQLdb.commit()
                 resultado_eliminar = cursor.rowcount
 

@@ -11,7 +11,7 @@ function fadeOut(element) {
   }, 50);
 }
 fadeOut(loaderOut);
-
+/*
 function eliminarVehiculo(id_vehiculo, foto_duenio) {
   if (confirm("¿Estas seguro que deseas Eliminar el vehiculo?")) {
     let url = `/borrar-vehiculo/${id_vehiculo}/${foto_duenio}`;
@@ -19,4 +19,4 @@ function eliminarVehiculo(id_vehiculo, foto_duenio) {
       window.location.href = url;
     }
   }
-}
+}*/
