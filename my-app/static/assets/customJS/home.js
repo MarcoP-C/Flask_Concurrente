@@ -12,9 +12,9 @@ function fadeOut(element) {
 }
 fadeOut(loaderOut);
 
-function eliminarEmpleado(id_empleado, foto_empleado) {
-  if (confirm("¿Estas seguro que deseas Eliminar el empleado?")) {
-    let url = `/borrar-empleado/${id_empleado}/${foto_empleado}`;
+function eliminarVehiculo(id_vehiculo, foto_duenio) {
+  if (confirm("¿Estas seguro que deseas Eliminar el vehiculo?")) {
+    let url = `/borrar-vehiculo/${id_vehiculo}/${foto_duenio}`;
     if (url) {
       window.location.href = url;
     }

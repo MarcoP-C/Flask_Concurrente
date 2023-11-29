@@ -21,7 +21,7 @@ from flask import send_file
 # Creamos un objeto Lock para sincronizar el acceso a la conexión a la base de datos
 lock = threading.Lock()
 
-def procesar_form_empleado(dataForm, foto_perfil):
+def procesar_form_vehiculo(dataForm, foto_perfil):
     # Formateando Salario
     #salario_sin_puntos = re.sub('[^0-9]+', '', dataForm['salario_empleado'])
     # Convertir salario a INT
@@ -88,7 +88,7 @@ def procesar_imagen_perfil(foto):
 
 
 # Lista de Empleados
-def sql_lista_empleadosBD():
+def sql_lista_vehiculosBD():
     try:
         empleadosBD = None
 
@@ -128,7 +128,7 @@ def sql_lista_empleadosBD():
 
 
 # Detalles del Empleado
-def sql_detalles_empleadosBD(idVehiculo):
+def sql_detalles_vehiculosBD(idVehiculo):
     try:
         with connectionBD() as conexion_MySQLdb:
             with conexion_MySQLdb.cursor(dictionary=True) as cursor:
@@ -251,17 +251,18 @@ def buscarEmpleadoBD(search):
             with conexion_MySQLdb.cursor(dictionary=True) as mycursor:
                 querySQL = ("""
                         SELECT 
-                            e.id_empleado,
-                            e.nombre_empleado, 
-                            e.apellido_empleado,
-                            e.salario_empleado,
+                            e.id_vehiculo,
+                            e.nombre_duenio, 
                             CASE
-                                WHEN e.sexo_empleado = 1 THEN 'Masculino'
+                                WHEN e.sexo_duenio = 1 THEN 'Masculino'
                                 ELSE 'Femenino'
-                            END AS sexo_empleado
-                        FROM tbl_empleados AS e
-                        WHERE e.nombre_empleado LIKE %s 
-                        ORDER BY e.id_empleado DESC
+                            END AS sexo_duenio,
+                            e.marca_auto,
+                            e.modelo_auto
+                            
+                        FROM tbl_vehiculos AS e
+                        WHERE e.nombre_duenio LIKE %s 
+                        ORDER BY e.id_vehiculo DESC
                     """)
                 search_pattern = f"%{search}%"  # Agregar "%" alrededor del término de búsqueda
                 mycursor.execute(querySQL, (search_pattern,))
@@ -377,12 +378,12 @@ def lista_usuariosBD():
 
 
 # Eliminar uEmpleado
-def eliminarEmpleado(id_empleado, foto_empleado):
+def eliminarVehiculo(id_vehiculo, foto_duenio):
     try:
         with connectionBD() as conexion_MySQLdb:
             with conexion_MySQLdb.cursor(dictionary=True) as cursor:
-                querySQL = "DELETE FROM tbl_empleados WHERE id_empleado=%s"
-                cursor.execute(querySQL, (id_empleado,))
+                querySQL = "DELETE FROM tbl_vehiculos WHERE id_vehiculo=%s"
+                cursor.execute(querySQL, (id_vehiculo,))
                 conexion_MySQLdb.commit()
                 resultado_eliminar = cursor.rowcount
 
@@ -390,7 +391,7 @@ def eliminarEmpleado(id_empleado, foto_empleado):
                     # Eliminadon foto_empleado desde el directorio
                     basepath = path.dirname(__file__)
                     url_File = path.join(
-                        basepath, '../static/fotos_empleados', foto_empleado)
+                        basepath, '../static/fotos_empleados', foto_duenio)
 
                     if path.exists(url_File):
                         remove(url_File)  # Borrar foto desde la carpeta

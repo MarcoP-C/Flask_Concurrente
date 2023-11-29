@@ -1,13 +1,13 @@
-{% for empleado in dataBusqueda %}
-<tr id="empleado_{{ empleado.id_empleado }}">
+{% for vehiculo in dataBusqueda %}
+<tr id="vehiculo_{{ vehiculo.id_vehiculo }}">
   <td>{{ loop.index }}</td>
-  <td>{{ empleado.nombre_empleado }}</td>
-  <td>{{ empleado.apellido_empleado }}</td>
-  <td>{{ empleado.sexo_empleado }}</td>
-  <td>$ {{ '{:,.0f}'.format(empleado.salario_empleado).replace(',', '.')}}</td>
+  <td>{{ vehiculo.nombre_duenio }}</td>
+  <td>{{ vehiculo.sexo_duenio }}</td>
+  <td>{{ vehiculo.marca_auto }}</td>
+  <td>$ {{ vehiculo.modelo_auto}}</td>
   <td>
     <a
-      href="/detalles-empleado/{{ empleado.id_empleado }}"
+      href="/detalles-vehiculo/{{ vehiculo.id_vehiculo}}"
       title="Ver envio"
       type="button"
       class="btn btn-info btn-sm"
@@ -20,7 +20,7 @@
       Ver detalles
     </a>
     <a
-      href="{{ url_for('viewEditarEmpleado', id = empleado.id_empleado) }}"
+      href="{{ url_for('viewEditarEmpleado', id = vehiculo.id_vehiculo) }}"
       class="btn btn-success btn-sm"
       tooltip="Actualizar Registro">
       <i class="bi bi-arrow-clockwise"></i>
@@ -28,13 +28,13 @@
     </a>
     <a
       href="#"
-      onclick="eliminarEmpleado('{{ empleado.id_empleado }}');"
+      onclick="eliminarEmpleado('{{ vehiculo.id_vehiculo }}');"
       class="btn btn-danger btn-sm"
       data-bs-toggle="tooltip"
       data-bs-offset="0,4"
       data-bs-placement="top"
       data-bs-html="true"
-      title="<span>Eliminar empleado {{ empleado.nombre_empleado }}</span>">
+      title="<span>Eliminar empleado {{ vehiculo.nombre_duenio }}</span>">
       <i class="bi bi-trash3"></i>
       Eliminar
     </a>

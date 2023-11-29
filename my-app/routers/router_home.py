@@ -19,16 +19,16 @@ def viewFormVehiculo():
 
 
 @app.route('/form-registrar-vehiculo', methods=['POST'])
-def formEmpleado():
+def formVehiculo():
     if 'conectado' in session:
         if 'foto_duenio' in request.files:
             foto_perfil = request.files['foto_duenio']
-            resultado = procesar_form_empleado(request.form, foto_perfil)
+            resultado = procesar_form_vehiculo(request.form, foto_perfil)
             if resultado > 0:  # Verifica si se insertó al menos una fila en la base de datos
                 return redirect(url_for('lista_vehiculos'))
             else:
-                flash('El empleado NO fue registrado.', 'error')
-                return render_template(f'{PATH_URL}/form_empleado.html')
+                flash('El vehiculo NO fue registrado.', 'error')
+                return render_template(f'{PATH_URL}/form_vehiculo.html')
     else:
         flash('Primero debes iniciar sesión.', 'error')
         return redirect(url_for('inicio'))
@@ -38,23 +38,23 @@ def formEmpleado():
 @app.route('/lista-de-vehiculos', methods=['GET'])
 def lista_vehiculos():
     if 'conectado' in session:
-        return render_template(f'{PATH_URL}/lista_vehiculos.html', vehiculos=sql_lista_empleadosBD())
+        return render_template(f'{PATH_URL}/lista_vehiculos.html', vehiculos=sql_lista_vehiculosBD())
     else:
         flash('primero debes iniciar sesión.', 'error')
         return redirect(url_for('inicio'))
 
 
-@app.route("/detalles-empleado/", methods=['GET'])
+@app.route("/detalles-vehiculo/", methods=['GET'])
 
-@app.route("/detalles-empleado/<int:idVehiculo>", methods=['GET'])
-def detalleEmpleado(idVehiculo=None):
+@app.route("/detalles-vehiculo/<int:idVehiculo>", methods=['GET'])
+def detalleVehiculo(idVehiculo=None):
     if 'conectado' in session:
         # Verificamos si el parámetro idEmpleado es None o no está presente en la URL
         if idVehiculo is None:
             return redirect(url_for('inicio'))
         else:
-            detalle_empleado = sql_detalles_empleadosBD(idVehiculo) or []
-            return render_template(f'{PATH_URL}/detalles_empleado.html', detalle_empleado=detalle_empleado)
+            detalle_vehiculo = sql_detalles_vehiculosBD(idVehiculo) or []
+            return render_template(f'{PATH_URL}/detalles_vehiculo.html', detalle_vehiculo=detalle_vehiculo)
     else:
         flash('Primero debes iniciar sesión.', 'error')
         return redirect(url_for('inicio'))
@@ -109,12 +109,18 @@ def borrarUsuario(id):
         return redirect(url_for('usuarios'))
 
 
-@app.route('/borrar-empleado/<string:id_empleado>/<string:foto_empleado>', methods=['GET'])
-def borrarEmpleado(id_empleado, foto_empleado):
-    resp = eliminarEmpleado(id_empleado, foto_empleado)
-    if resp:
-        flash('El Empleado fue eliminado correctamente', 'success')
-        return redirect(url_for('lista_empleados'))
+@app.route('/borrar-vehiculo/<string:id_vehiculo>/<string:foto_duenio>', methods=['GET'])
+def borrarVehiculo(id_vehiculo, foto_duenio):
+    resp = eliminarVehiculo(id_vehiculo, foto_duenio)
+    if resp > 0:
+        flash('El vehículo fue eliminado correctamente', 'success')
+    elif resp == 0:
+        flash('El vehículo no se pudo eliminar', 'error')
+    else:
+        flash('Ocurrió un error al intentar eliminar el vehículo', 'error')
+    
+    return redirect(url_for('lista_vehiculos'))
+
 
 
 @app.route("/descargar-informe-empleados/", methods=['GET'])

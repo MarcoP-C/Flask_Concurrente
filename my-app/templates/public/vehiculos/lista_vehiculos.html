@@ -52,7 +52,7 @@
               
               <td width="10px">
                 <a
-                  href="/detalles-empleado/{{ vehiculo.id_vehiculo }}"
+                  href="/detalles-vehiculo/{{ vehiculo.id_vehiculo }}"
                   title="Ver envio"
                   type="button"
                   class="btn btn-info btn-sm"
@@ -73,13 +73,13 @@
                 </a>
                 <a
                   href="#"
-                  onclick="eliminarEmpleado('{{ vehiculo.id_vehiculo }}','{{ vehiculo.foto_duenio }}');"
+                  onclick="eliminarVehiculo('{{ vehiculo.id_vehiculo }}','{{ vehiculo.foto_duenio }}');"
                   class="btn btn-danger btn-sm"
                   data-bs-toggle="tooltip"
                   data-bs-offset="0,4"
                   data-bs-placement="top"
                   data-bs-html="true"
-                  title="<span>Eliminar empleado {{ vehiculo.nombre_duenio }}</span>">
+                  title="<span>Eliminar vehiculo {{ vehiculo.nombre_duenio }}</span>">
                   <i class="bi bi-trash3"></i>
                   Eliminar
                 </a>

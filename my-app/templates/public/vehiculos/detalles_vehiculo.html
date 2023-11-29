@@ -11,7 +11,7 @@
 <!--Inicio del block-->
 {% block body %}
 <!---->
-{% if (detalle_empleado|length) %}
+{% if (detalle_vehiculo|length) %}
 <div class="card" style="border-radius: 0px !important">
   <div class="row justify-content-center mb-2">
     <div class="col-md-12">
@@ -34,14 +34,14 @@
               Nombre del dueño
             </label>
             <br />
-            {{ detalle_empleado.nombre_duenio}}
+            {{ detalle_vehiculo.nombre_duenio}}
           </div>
           <div class="col-md-6">
             <label for="sexo_duenio" class="form-label">
               Sexo del dueño
             </label>
             <br />
-            {{ detalle_empleado.sexo_duenio}}
+            {{ detalle_vehiculo.sexo_duenio}}
           </div>
         </div>
 
@@ -51,14 +51,14 @@
               Marca del auto
             </label>
             <br />
-            {{ detalle_empleado.marca_auto}}
+            {{ detalle_vehiculo.marca_auto}}
           </div>
           <div class="col-md-6">
             <label for="modelo_auto" class="form-label">
               Modelo del auto
             </label>
             <br />
-            {{ detalle_empleado.modelo_auto}}
+            {{ detalle_vehiculo.modelo_auto}}
           </div>
         </div>
 
@@ -68,14 +68,14 @@
               Numero de factura
             </label>
             <br />
-            {{ detalle_empleado.factura}}
+            {{ detalle_vehiculo.factura}}
           </div>
           <div class="col-md-6">
             <label for="tarjeta_circulacion" class="form-label">
               Numero de tarjeta de circulacion
             </label>
             <br />
-            {{ detalle_empleado.tarjeta_circulacion}}
+            {{ detalle_vehiculo.tarjeta_circulacion}}
           </div>
         </div>
 
@@ -85,14 +85,14 @@
               Email del dueño
             </label>
             <br />
-            {{ detalle_empleado.email_duenio}}
+            {{ detalle_vehiculo.email_duenio}}
           </div>
           <div class="col-md-6">
             <label for="" class="form-label"> IMAGEN DEL Dueño </label>
             <br />
             <img
               style="width: 200px"
-              src="/static/fotos_empleados/{{ detalle_empleado.foto_duenio }}"
+              src="/static/fotos_empleados/{{ detalle_vehiculo.foto_duenio }}"
               alt="imagen-dueño" />
           </div>
         </div>
@@ -102,7 +102,7 @@
 </div>
 {% else %}
 <h2 class="text-center">
-  No existe el Empleado 😭
+  No existe el Empleado
   <hr />
 </h2>
 {% endif %} {% endblock %}
