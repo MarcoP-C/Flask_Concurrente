@@ -120,7 +120,7 @@ def borrarEmpleado(id_empleado, foto_empleado):
 @app.route("/descargar-informe-empleados/", methods=['GET'])
 def reporteBD():
     if 'conectado' in session:
-        return generarReporteExcel()
+        return generarReportePDF()
     else:
         flash('primero debes iniciar sesión.', 'error')
         return redirect(url_for('inicio'))

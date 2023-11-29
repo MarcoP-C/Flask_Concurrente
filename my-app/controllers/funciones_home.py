@@ -3,6 +3,9 @@ from werkzeug.utils import secure_filename
 import uuid  # Modulo de python para crear un string
 
 from conexion.conexionBD import connectionBD  # Conexión a BD
+import sys
+sys.path.append(r'my-app/conexion/conexionBD.py')
+
 
 import threading
 import datetime
@@ -191,8 +194,62 @@ def empleadosReporte():
             f"Errro en la función empleadosReporte: {e}")
         return None
 
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from openpyxl import load_workbook
+import os
+import datetime
+from flask import send_file
 
-def generarReporteExcel():
+def generarReportePDF():
+    dataEmpleados = empleadosReporte()
+
+    # Crear el archivo PDF
+    fecha_actual = datetime.datetime.now()
+    archivoPDF = f"Reporte_empleados_{fecha_actual.strftime('%Y_%m_%d')}.pdf"
+    carpeta_descarga = "../static/downloads-pdf"
+    ruta_descarga = os.path.join(os.path.dirname(
+        os.path.abspath(__file__)), carpeta_descarga)
+
+    try:
+        os.makedirs(ruta_descarga)
+        os.chmod(ruta_descarga, 0o755)
+    except FileExistsError:
+        pass
+
+    ruta_archivo_pdf = os.path.join(ruta_descarga, archivoPDF)
+    pdf = canvas.Canvas(ruta_archivo_pdf, pagesize=letter)
+
+    # Configurar el tamaño de la fuente y otros estilos según sea necesario
+    pdf.setFont("Helvetica", 11)
+
+    # Agregar la fila de encabezado con los títulos al PDF
+    for col_num, titulo in enumerate(("Nombre", "Apellido", "Sexo", "Telefono", "Email",  "Fecha de Ingreso"), start=1):
+        pdf.drawString(col_num * 70, 750, titulo)
+
+    # Agregar los registros al PDF
+    for fila_num, registro in enumerate(dataEmpleados, start=2):
+        # Obtener los datos del registro
+        nombre_empleado = registro['nombre_empleado']
+        apellido_empleado = registro['apellido_empleado']
+        sexo_empleado = registro['sexo_empleado']
+        telefono_empleado = registro['telefono_empleado']
+        email_empleado = registro['email_empleado']
+        #profesion_empleado = registro['profesion_empleado']
+       # salario_empleado = registro['salario_empleado']
+        fecha_registro = registro['fecha_registro']
+
+        # Agregar el contenido a la posición deseada en el PDF
+        for col_num, valor in enumerate((nombre_empleado, apellido_empleado ,sexo_empleado, telefono_empleado, email_empleado,  fecha_registro), start=1):
+            pdf.drawString(col_num * 70, (740 - fila_num * 30), str(valor))
+
+    # Guardar y cerrar el PDF
+    pdf.save()
+
+    # Enviar el archivo PDF como respuesta HTTP
+    return send_file(ruta_archivo_pdf, as_attachment=True)
+
+'''def generarReporteExcel():
     dataEmpleados = empleadosReporte()
     wb = openpyxl.Workbook()
     hoja = wb.active
@@ -242,7 +299,7 @@ def generarReporteExcel():
     wb.save(ruta_archivo)
 
     # Enviar el archivo como respuesta HTTP
-    return send_file(ruta_archivo, as_attachment=True)
+    return send_file(ruta_archivo, as_attachment=True)'''
 
 
 def buscarEmpleadoBD(search):

@@ -4,6 +4,8 @@ from flask import render_template, request, flash, redirect, url_for, session
 
 # Importando mi conexión a BD
 from conexion.conexionBD import connectionBD
+import MySQLdb
+
 
 # Para encriptar contraseña generate_password_hash
 from werkzeug.security import check_password_hash
@@ -108,6 +110,11 @@ def loginCliente():
             # Comprobando si existe una cuenta
             conexion_MySQLdb = connectionBD()
             cursor = conexion_MySQLdb.cursor(dictionary=True)
+            try:
+                cursor = conexion_MySQLdb.cursor(dictionary=True)
+            except Exception as e:
+                print(f"Error al crear el cursor: {e}")
+
             cursor.execute(
                 "SELECT * FROM users WHERE email_user = %s", [email_user])
             account = cursor.fetchone()
