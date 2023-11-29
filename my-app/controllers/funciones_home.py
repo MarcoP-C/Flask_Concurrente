@@ -1,10 +1,10 @@
-
 # Para subir archivo tipo foto al servidor
 from werkzeug.utils import secure_filename
 import uuid  # Modulo de python para crear un string
 
 from conexion.conexionBD import connectionBD  # Conexión a BD
 
+import threading
 import datetime
 import re
 import os
@@ -13,35 +13,47 @@ from os import remove  # Modulo  para remover archivo
 from os import path  # Modulo para obtener la ruta o directorio
 
 
+
 import openpyxl  # Para generar el excel
 # biblioteca o modulo send_file para forzar la descarga
 from flask import send_file
 
+# Creamos un objeto Lock para sincronizar el acceso a la conexión a la base de datos
+lock = threading.Lock()
 
 def procesar_form_empleado(dataForm, foto_perfil):
     # Formateando Salario
-    salario_sin_puntos = re.sub('[^0-9]+', '', dataForm['salario_empleado'])
-    # convertir salario a INT
-    salario_entero = int(salario_sin_puntos)
+    #salario_sin_puntos = re.sub('[^0-9]+', '', dataForm['salario_empleado'])
+    # Convertir salario a INT
+    #salario_entero = int(salario_sin_puntos)
 
     result_foto_perfil = procesar_imagen_perfil(foto_perfil)
-    try:
-        with connectionBD() as conexion_MySQLdb:
-            with conexion_MySQLdb.cursor(dictionary=True) as cursor:
 
-                sql = "INSERT INTO tbl_empleados (nombre_empleado, apellido_empleado, sexo_empleado, telefono_empleado, email_empleado, profesion_empleado, foto_empleado, salario_empleado) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+    resultado_insert = -1  # Valor predeterminado en caso de error
 
-                # Creando una tupla con los valores del INSERT
-                valores = (dataForm['nombre_empleado'], dataForm['apellido_empleado'], dataForm['sexo_empleado'],
-                           dataForm['telefono_empleado'], dataForm['email_empleado'], dataForm['profesion_empleado'], result_foto_perfil, salario_entero)
-                cursor.execute(sql, valores)
+    def ejecutar_procesamiento():
+        nonlocal resultado_insert
+        try:
+            with connectionBD() as conexion_MySQLdb:
+                with conexion_MySQLdb.cursor(dictionary=True) as cursor:
+                    sql = "INSERT INTO tbl_vehiculos (nombre_duenio, sexo_duenio, marca_auto, modelo_auto, factura, tarjeta_circulacion, email_duenio, foto_duenio) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
 
-                conexion_MySQLdb.commit()
-                resultado_insert = cursor.rowcount
-                return resultado_insert
+                    valores = (dataForm['nombre_duenio'], dataForm['sexo_duenio'], dataForm['marca_auto'],
+                               dataForm['modelo_auto'], dataForm['factura'], dataForm['tarjeta_circulacion'],dataForm['email_duenio'], result_foto_perfil)
+                    
+                    with lock:
+                        cursor.execute(sql, valores)
+                        conexion_MySQLdb.commit()
+                        resultado_insert = cursor.rowcount
+        except Exception as e:
+            print(f'Se produjo un error en procesar_form_empleado: {str(e)}')
 
-    except Exception as e:
-        return f'Se produjo un error en procesar_form_empleado: {str(e)}'
+    # Crear un hilo para ejecutar el procesamiento
+    thread = threading.Thread(target=ejecutar_procesamiento)
+    thread.start()
+    thread.join()  # Esperar a que el hilo termine su ejecución
+
+    return resultado_insert
 
 
 def procesar_imagen_perfil(foto):
@@ -78,56 +90,69 @@ def procesar_imagen_perfil(foto):
 # Lista de Empleados
 def sql_lista_empleadosBD():
     try:
-        with connectionBD() as conexion_MySQLdb:
-            with conexion_MySQLdb.cursor(dictionary=True) as cursor:
-                querySQL = (f"""
-                    SELECT 
-                        e.id_empleado,
-                        e.nombre_empleado, 
-                        e.apellido_empleado,
-                        e.salario_empleado,
-                        e.foto_empleado,
-                        CASE
-                            WHEN e.sexo_empleado = 1 THEN 'Masculino'
-                            ELSE 'Femenino'
-                        END AS sexo_empleado
-                    FROM tbl_empleados AS e
-                    ORDER BY e.id_empleado DESC
-                    """)
-                cursor.execute(querySQL,)
-                empleadosBD = cursor.fetchall()
+        empleadosBD = None
+
+        def ejecutar_consulta():
+            nonlocal empleadosBD
+            try:
+                with connectionBD() as conexion_MySQLdb:
+                    with conexion_MySQLdb.cursor(dictionary=True) as cursor:
+                        querySQL = (f"""
+                            SELECT 
+                                e.id_vehiculo,
+                                e.nombre_duenio, 
+                                CASE
+                                    WHEN e.sexo_duenio = 1 THEN 'Masculino'
+                                    ELSE 'Femenino'
+                                END AS sexo_duenio,
+                                e.marca_auto,
+                                e.modelo_auto,
+                                e.factura
+                                
+                            FROM tbl_vehiculos AS e
+                            ORDER BY e.id_vehiculo DESC
+                            """)
+                        cursor.execute(querySQL)
+                        empleadosBD = cursor.fetchall()
+            except Exception as e:
+                print(f"Error en la función sql_lista_empleadosBD: {e}")
+
+        thread = threading.Thread(target=ejecutar_consulta)
+        thread.start()
+        thread.join()  # Esperar a que el hilo termine su ejecución
+
         return empleadosBD
     except Exception as e:
-        print(
-            f"Errro en la función sql_lista_empleadosBD: {e}")
+        print(f"Error general en sql_lista_empleadosBD: {e}")
         return None
 
 
 # Detalles del Empleado
-def sql_detalles_empleadosBD(idEmpleado):
+def sql_detalles_empleadosBD(idVehiculo):
     try:
         with connectionBD() as conexion_MySQLdb:
             with conexion_MySQLdb.cursor(dictionary=True) as cursor:
                 querySQL = ("""
                     SELECT 
-                        e.id_empleado,
-                        e.nombre_empleado, 
-                        e.apellido_empleado,
-                        e.salario_empleado,
+                        e.id_vehiculo,
+                        e.nombre_duenio, 
                         CASE
-                            WHEN e.sexo_empleado = 1 THEN 'Masculino'
+                            WHEN e.sexo_duenio = 1 THEN 'Masculino'
                             ELSE 'Femenino'
-                        END AS sexo_empleado,
-                        e.telefono_empleado, 
-                        e.email_empleado,
-                        e.profesion_empleado,
-                        e.foto_empleado,
+                        END AS sexo_duenio,
+                        e.marca_auto,
+                        e.modelo_auto,
+                        
+                        e.factura, 
+                        e.tarjeta_circulacion,
+                        e.email_duenio,
+                        e.foto_duenio,
                         DATE_FORMAT(e.fecha_registro, '%Y-%m-%d %h:%i %p') AS fecha_registro
-                    FROM tbl_empleados AS e
-                    WHERE id_empleado =%s
-                    ORDER BY e.id_empleado DESC
+                    FROM tbl_vehiculos AS e
+                    WHERE id_vehiculo =%s
+                    ORDER BY e.id_vehiculo DESC
                     """)
-                cursor.execute(querySQL, (idEmpleado,))
+                cursor.execute(querySQL, (idVehiculo,))
                 empleadosBD = cursor.fetchone()
         return empleadosBD
     except Exception as e:

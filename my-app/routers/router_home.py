@@ -21,37 +21,39 @@ def viewFormVehiculo():
 @app.route('/form-registrar-vehiculo', methods=['POST'])
 def formEmpleado():
     if 'conectado' in session:
-        if 'foto_empleado' in request.files:
-            foto_perfil = request.files['foto_empleado']
+        if 'foto_duenio' in request.files:
+            foto_perfil = request.files['foto_duenio']
             resultado = procesar_form_empleado(request.form, foto_perfil)
-            if resultado:
-                return redirect(url_for('lista_empleados'))
+            if resultado > 0:  # Verifica si se insertó al menos una fila en la base de datos
+                return redirect(url_for('lista_vehiculos'))
             else:
                 flash('El empleado NO fue registrado.', 'error')
                 return render_template(f'{PATH_URL}/form_empleado.html')
     else:
-        flash('primero debes iniciar sesión.', 'error')
+        flash('Primero debes iniciar sesión.', 'error')
         return redirect(url_for('inicio'))
 
 
-@app.route('/lista-de-empleados', methods=['GET'])
-def lista_empleados():
+
+@app.route('/lista-de-vehiculos', methods=['GET'])
+def lista_vehiculos():
     if 'conectado' in session:
-        return render_template(f'{PATH_URL}/lista_empleados.html', empleados=sql_lista_empleadosBD())
+        return render_template(f'{PATH_URL}/lista_vehiculos.html', vehiculos=sql_lista_empleadosBD())
     else:
         flash('primero debes iniciar sesión.', 'error')
         return redirect(url_for('inicio'))
 
 
 @app.route("/detalles-empleado/", methods=['GET'])
-@app.route("/detalles-empleado/<int:idEmpleado>", methods=['GET'])
-def detalleEmpleado(idEmpleado=None):
+
+@app.route("/detalles-empleado/<int:idVehiculo>", methods=['GET'])
+def detalleEmpleado(idVehiculo=None):
     if 'conectado' in session:
         # Verificamos si el parámetro idEmpleado es None o no está presente en la URL
-        if idEmpleado is None:
+        if idVehiculo is None:
             return redirect(url_for('inicio'))
         else:
-            detalle_empleado = sql_detalles_empleadosBD(idEmpleado) or []
+            detalle_empleado = sql_detalles_empleadosBD(idVehiculo) or []
             return render_template(f'{PATH_URL}/detalles_empleado.html', detalle_empleado=detalle_empleado)
     else:
         flash('Primero debes iniciar sesión.', 'error')

@@ -3,7 +3,7 @@
     <a href="{{ url_for('inicio') }}" class="app-brand-link">
       <span class="app-brand-logo demo">
         <img
-          src="{{ url_for('static', filename ='assets/img/logo.png') }}"
+          src="{{ url_for('static', filename ='assets/img/carr.png') }}"
           alt="Logo" />
       </span>
     </a>
@@ -21,14 +21,14 @@
       class="menu-item {% if request.path == '/registrar-vehiculo' %} active {% endif %}">
       <a href="{{ url_for('viewFormVehiculo') }}" class="menu-link">
         <i class="menu-icon bi bi-person-bounding-box"></i>
-        <div data-i18n="Basic">Registrar Vehiculo</div>
+        <div data-i18n="Basic">Registrar Vehiculo</div> 
       </a>
     </li>
     <li
-      class="menu-item {% if request.path == '/lista-de-empleados' %} active{% endif %}">
-      <a href="/lista-de-empleados" class="menu-link">
+      class="menu-item {% if request.path == '/lista-de-vehiculos' %} active{% endif %}">
+      <a href="/lista-de-vehiculos" class="menu-link">
         <i class="menu-icon bi bi-person-lines-fill"></i>
-        <div data-i18n="Boxicons">Lista de Empleados</div>
+        <div data-i18n="Boxicons">Lista de Vehiculos</div>
       </a>
     </li>
     <li

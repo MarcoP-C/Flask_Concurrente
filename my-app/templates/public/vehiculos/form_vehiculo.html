@@ -29,97 +29,96 @@
         <div class="card-body">
           <div class="row">
             <div class="col-md-6">
-              <label for="nombre_empleado" class="form-label">
-                Marca del auto
-              </label>
-              <input
-                type="text"
-                name="nombre_empleado"
-                class="form-control"
-                required />
-            </div>
-            <div class="col-md-6">
-              <label for="apellido_empleado" class="form-label">
-                Apellido del empleado
+              <label for="nombre_duenio" class="form-label">
+                Nombre del dueño
               </label>
               <input
                 class="form-control"
                 type="text"
-                name="apellido_empleado"
+                name="nombre_duenio"
                 required />
             </div>
-          </div>
-
-          <div class="row mt-2">
             <div class="col-md-6">
-              <label for="sexo_empleado" class="form-label">
-                Sexo del empleado
+              <label for="sexo_duenio" class="form-label">
+                Sexo del dueño
               </label>
               <select
                 class="form-select"
-                name="sexo_empleado"
+                name="sexo_duenio"
                 aria-label="Default select example">
                 <option selected>Seleccione</option>
                 <option value="1">Masculino</option>
                 <option value="2">Femenino</option>
               </select>
             </div>
+          </div>
+
+          <div class="row mt-2">
             <div class="col-md-6">
-              <label for="telefono_empleado" class="form-label">
-                Telefono del empleado
+              <label for="marca_auto" class="form-label">
+                Marca del auto
+              </label>
+              <input
+                type="text"
+                name="marca_auto"
+                class="form-control"
+                required />
+            </div>
+            <div class="col-md-6">
+              <label for="modelo_auto" class="form-label">
+                Modelo del auto
               </label>
               <input
                 class="form-control"
                 type="text"
-                name="telefono_empleado"
+                name="modelo_auto"
                 required />
             </div>
           </div>
 
           <div class="row mt-2">
             <div class="col-md-6">
-              <label for="email_empleado" class="form-label">
-                Email del empleado
+              <label for="factura" class="form-label">
+                Factura
+              </label>
+              <input
+                class="form-control"
+                type="text"
+                name="factura"
+                required />
+            </div>
+            <div class="col-md-6">
+              <label for="tarjeta_circulacion" class="form-label">
+                Tarjeta de circulacion
+              </label>
+              <input
+                class="form-control"
+                type="text"
+                name="tarjeta_circulacion"
+                required />
+            </div>
+          </div>
+
+          <div class="row mt-2">
+            <div class="col-md-6">
+              <label for="email_duenio" class="form-label">
+                Correo electronico del dueño
               </label>
               <input
                 class="form-control"
                 type="email"
-                name="email_empleado"
-                required />
-            </div>
-            <div class="col-md-6">
-              <label for="profesion_empleado" class="form-label">
-                Profesión del empleado
-              </label>
-              <input
-                class="form-control"
-                type="text"
-                name="profesion_empleado"
-                required />
-            </div>
-          </div>
-
-          <div class="row mt-2">
-            <div class="col-md-6">
-              <label for="salario_empleado" class="form-label">
-                Salario del empleado
-              </label>
-              <input
-                class="form-control"
-                type="text"
-                name="salario_empleado"
-                id="salario_empleado"
+                name="email_duenio"
                 required />
             </div>
             <div class="col-md-6">
               <label for="" class="form-label">
-                CARGAR IMAGEN DEL EMPLEADO
+                CARGAR IMAGEN DEL Dueño
               </label>
               <div class="avatar-upload">
                 <div class="avatar-edit">
                   <input
                     type="file"
-                    name="foto_empleado"
+                    name="foto_duenio"
                     id="imageUpload"
                     accept=".png, .jpg, .jpeg" />
                   <label for="imageUpload"><i class="bi bi-pen"></i></label>
