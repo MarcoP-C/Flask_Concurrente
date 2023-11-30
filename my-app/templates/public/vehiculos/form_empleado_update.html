@@ -11,14 +11,14 @@
 <!--Inicio del block-->
 {% block body %}
 <div class="card" style="border-radius: 0px !important">
-  {% if respuestaEmpleado|length %}
+  {% if respuestaVehiculo|length %}
   <div class="row justify-content-center mb-2">
     <div class="col-md-12">
       <h3 class="text-center mt-5 mb-3">
-        <a href="/lista-de-empleados">
+        <a href="/lista-de-vehiculos">
           <i class="bi bi-arrow-left-circle"></i>
         </a>
-        ACTUALIZAR DATOS DEL EMPLEADOS
+        ACTUALIZAR DATOS DEL VEHICULO
       </h3>
       <hr />
     </div>
@@ -29,52 +29,38 @@
       <form
         class="form-horizontal mx-auto"
         method="POST"
-        action="{{ url_for('actualizarEmpleado', id = respuestaEmpleado.id_empleado ) }}"
+        action="{{ url_for('actualizarEmpleado', id_vehiculo = respuestaVehiculo.id_vehiculo ) }}"
         autocomplete="off"
         enctype="multipart/form-data">
         <input
           type="text"
           class="form-control"
           name="id_empleado"
-          value="{{ respuestaEmpleado.id_empleado }}"
+          value="{{ respuestaVehiculo.id_vehiculo }}"
           required
           hidden />
 
         <div class="card-body">
           <div class="row">
             <div class="col-md-6">
-              <label for="nombre_empleado" class="form-label">
-                Nombre del empleado
+              <label for="nombre_duenio" class="form-label">
+                Nombre del dueño
               </label>
               <input
                 type="text"
-                name="nombre_empleado"
-                value="{{ respuestaEmpleado.nombre_empleado }}"
+                name="nombre_duenio"
+                value="{{ respuestaVehiculo.nombre_duenio }}"
                 class="form-control"
                 required />
             </div>
             <div class="col-md-6">
-              <label for="apellido_empleado" class="form-label">
-                Apellido del empleado
-              </label>
-              <input
-                class="form-control"
-                type="text"
-                name="apellido_empleado"
-                value="{{ respuestaEmpleado.apellido_empleado }}"
-                required />
-            </div>
-          </div>
-
-          <div class="row mt-2">
-            <div class="col-md-6">
-              <label for="sexo_empleado" class="form-label">
-                Sexo del empleado
+              <label for="sexo_duenio" class="form-label">
+                Sexo del dueño
               </label>
               {% with tipo_sexo = {"1": "Masculino", "2": "Femenino"} %}
-              <select class="form-select" name="sexo_empleado">
+              <select class="form-select" name="sexo_duenio">
                 {% for clave, valor in tipo_sexo.items() %} {% if clave ==
-                respuestaEmpleado.sexo_empleado|string %}
+                respuestaVehiculo.sexo_duenio|string %}
                 <option value="{{ clave }}" selected>{{ valor }}</option>
                 {% else %}
                 <option value="{{ clave }}">{{ valor }}</option>
@@ -82,69 +68,93 @@
               </select>
               {% endwith %}
             </div>
+          </div>
 
+          <div class="row mt-2">
             <div class="col-md-6">
-              <label for="telefono_empleado" class="form-label">
-                Telefono del empleado
+              <label for="marca_auto" class="form-label">
+                Macra del auto
               </label>
               <input
                 class="form-control"
                 type="text"
-                name="telefono_empleado"
-                value="{{ respuestaEmpleado.telefono_empleado }}"
+                name="marca_auto"
+                value="{{ respuestaVehiculo.marca_auto }}"
+                required />
+            </div>
+
+            <div class="col-md-6">
+              <label for="modelo_auto" class="form-label">
+                Modelo del auto
+              </label>
+              <input
+                class="form-control"
+                type="text"
+                name="modelo_auto"
+                value="{{ respuestaVehiculo.modelo_auto }}"
                 required />
             </div>
           </div>
 
           <div class="row mt-2">
             <div class="col-md-6">
-              <label for="email_empleado" class="form-label">
-                Email del empleado
+              <label for="factura" class="form-label">
+                Factura del auto
               </label>
               <input
                 class="form-control"
                 type="email"
-                name="email_empleado"
-                value="{{ respuestaEmpleado.email_empleado }}"
+                name="factura"
+                value="{{ respuestaVehiculo.factura }}"
                 required />
             </div>
             <div class="col-md-6">
-              <label for="profesion_empleado" class="form-label">
-                Profesión del empleado
+              <label for="tarjeta_circulacion" class="form-label">
+                Numero de tarjeta de circulacion
               </label>
               <input
                 class="form-control"
                 type="text"
-                name="profesion_empleado"
-                value="{{ respuestaEmpleado.profesion_empleado }}"
+                name="tarjeta_circulacion"
+                value="{{ respuestaVehiculo.tarjeta_circulacion }}"
                 required />
             </div>
           </div>
 
           <div class="row mt-2">
             <div class="col-md-6">
-              <label for="salario_empleado" class="form-label">
-                Salario del empleado
+              <label for="email_duenio" class="form-label">
+                Email del dueño
+              </label>
+              <input
+                class="form-control"
+                type="email"
+                name="email_duenio"
+                value="{{ respuestaVehiculo.email_duenio }}"
+                required />
+            </div>
+            <div class="col-md-6">
+              <label for="foto_duenio" class="form-label">
+                Foto del dueño
               </label>
               <input
                 class="form-control"
                 type="text"
-                name="salario_empleado"
-                value="{{ respuestaEmpleado.salario_empleado }}"
-                id="salario_empleado"
+                name="foto_duenio"
+                value="{{ respuestaVehiculo.foto_duenio }}"
                 required />
             </div>
-            <div class="col-md-6">
+            <!-- <div class="col-md-6">
               <label for="" class="form-label"> FOTO DEL EMPLEADO </label>
               <br />
               <img
-                src="/static/fotos_empleados/{{ respuestaEmpleado.foto_empleado }}"
+                src="/static/fotos_empleados/{{ respuestaVehiculo.foto_empleado }}"
                 style="width: 150px"
-                alt="{{ respuestaEmpleado.nombre_empleado }}" />
-            </div>
+                alt="{{ respuestaVehiculo.nombre_empleado }}" />
+            </div> -->
           </div>
 
-          <div class="row">
+          <!-- <div class="row">
             <div class="col-md-6">
               <label for="" class="form-label">
                 ACTUALIZAR LA FOTO DEL EMPLEADO
@@ -167,7 +177,7 @@
                 </div>
               </div>
             </div>
-          </div>
+          </div> -->
 
           <div class="mb-3 mt-4 text-center">
             <button type="submit" class="btn rounded-pill btn-primary">

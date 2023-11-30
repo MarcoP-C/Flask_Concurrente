@@ -111,28 +111,14 @@
                 required />
             </div>
             <div class="col-md-6">
-              <label for="" class="form-label">
-                CARGAR IMAGEN DEL Dueño
+              <label for="foto_duenio" class="form-label">
+                Foto del dueño
               </label>
-              <div class="avatar-upload">
-                <div class="avatar-edit">
-                  <input
-                    type="file"
-                    name="foto_duenio"
-                    id="imageUpload"
-                    accept=".png, .jpg, .jpeg" />
-                  <label for="imageUpload"><i class="bi bi-pen"></i></label>
-                </div>
-                <div class="avatar-preview">
-                  <div class="avatar-preview">
-                    {% set url_avatar= url_for('static', filename
-                    ='assets/img/avatar.png') %}
-                    <div
-                      id="imagePreview"
-                      style="background-image: url('{{ url_avatar }}')"></div>
-                  </div>
-                </div>
-              </div>
+              <input
+                class="form-control"
+                type="text"
+                name="foto_duenio"
+                required />
             </div>
           </div>
 

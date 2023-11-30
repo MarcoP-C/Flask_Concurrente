@@ -24,13 +24,13 @@ from flask import send_file
 # Creamos un objeto Lock para sincronizar el acceso a la conexión a la base de datos
 lock = threading.Lock()
 
-def procesar_form_empleado(dataForm, foto_perfil):
+def procesar_form_vehiculo(dataForm):
     # Formateando Salario
     #salario_sin_puntos = re.sub('[^0-9]+', '', dataForm['salario_empleado'])
     # Convertir salario a INT
     #salario_entero = int(salario_sin_puntos)
 
-    result_foto_perfil = procesar_imagen_perfil(foto_perfil)
+    #result_foto_perfil = procesar_imagen_perfil(foto_perfil)
 
     resultado_insert = -1  # Valor predeterminado en caso de error
 
@@ -42,7 +42,7 @@ def procesar_form_empleado(dataForm, foto_perfil):
                     sql = "INSERT INTO tbl_vehiculos (nombre_duenio, sexo_duenio, marca_auto, modelo_auto, factura, tarjeta_circulacion, email_duenio, foto_duenio) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
 
                     valores = (dataForm['nombre_duenio'], dataForm['sexo_duenio'], dataForm['marca_auto'],
-                               dataForm['modelo_auto'], dataForm['factura'], dataForm['tarjeta_circulacion'],dataForm['email_duenio'], result_foto_perfil)
+                               dataForm['modelo_auto'], dataForm['factura'], dataForm['tarjeta_circulacion'],dataForm['email_duenio'], dataForm['foto_duenio'])
                     
                     with lock:
                         cursor.execute(sql, valores)
@@ -91,7 +91,7 @@ def procesar_imagen_perfil(foto):
 
 
 # Lista de Empleados
-def sql_lista_empleadosBD():
+def sql_lista_vehiculosBD():
     try:
         empleadosBD = None
 
@@ -131,7 +131,7 @@ def sql_lista_empleadosBD():
 
 
 # Detalles del Empleado
-def sql_detalles_empleadosBD(idVehiculo):
+def sql_detalles_vehiculosBD(idVehiculo):
     try:
         with connectionBD() as conexion_MySQLdb:
             with conexion_MySQLdb.cursor(dictionary=True) as cursor:
@@ -308,17 +308,18 @@ def buscarEmpleadoBD(search):
             with conexion_MySQLdb.cursor(dictionary=True) as mycursor:
                 querySQL = ("""
                         SELECT 
-                            e.id_empleado,
-                            e.nombre_empleado, 
-                            e.apellido_empleado,
-                            e.salario_empleado,
+                            e.id_vehiculo,
+                            e.nombre_duenio, 
                             CASE
-                                WHEN e.sexo_empleado = 1 THEN 'Masculino'
+                                WHEN e.sexo_duenio = 1 THEN 'Masculino'
                                 ELSE 'Femenino'
-                            END AS sexo_empleado
-                        FROM tbl_empleados AS e
-                        WHERE e.nombre_empleado LIKE %s 
-                        ORDER BY e.id_empleado DESC
+                            END AS sexo_duenio,
+                            e.marca_auto,
+                            e.modelo_auto
+                            
+                        FROM tbl_vehiculos AS e
+                        WHERE e.nombre_duenio LIKE %s 
+                        ORDER BY e.id_vehiculo DESC
                     """)
                 search_pattern = f"%{search}%"  # Agregar "%" alrededor del término de búsqueda
                 mycursor.execute(querySQL, (search_pattern,))
@@ -330,27 +331,27 @@ def buscarEmpleadoBD(search):
         return []
 
 
-def buscarEmpleadoUnico(id):
+def buscarEmpleadoUnico(id_vehiculo):
     try:
         with connectionBD() as conexion_MySQLdb:
             with conexion_MySQLdb.cursor(dictionary=True) as mycursor:
                 querySQL = ("""
                         SELECT 
-                            e.id_empleado,
-                            e.nombre_empleado, 
-                            e.apellido_empleado,
-                            e.sexo_empleado,
-                            e.telefono_empleado,
-                            e.email_empleado,
-                            e.profesion_empleado,
-                            e.salario_empleado,
-                            e.foto_empleado
-                        FROM tbl_empleados AS e
-                        WHERE e.id_empleado =%s LIMIT 1
+                            e.id_vehiculo,
+                            e.nombre_duenio, 
+                            e.sexo_duenio,
+                            e.marca_auto,
+                            e.modelo_auto,
+                            e.factura,
+                            e.tarjeta_circulacion,
+                            e.email_duenio,
+                            e.foto_duenio
+                        FROM tbl_vehiculos AS e
+                        WHERE e.id_vehiculo =%s LIMIT 1
                     """)
-                mycursor.execute(querySQL, (id,))
-                empleado = mycursor.fetchone()
-                return empleado
+                mycursor.execute(querySQL, (id_vehiculo,))
+                vehiculo = mycursor.fetchone()
+                return vehiculo
 
     except Exception as e:
         print(f"Ocurrió un error en def buscarEmpleadoUnico: {e}")
@@ -434,29 +435,49 @@ def lista_usuariosBD():
 
 
 # Eliminar uEmpleado
-def eliminarEmpleado(id_empleado, foto_empleado):
+# def eliminarVehiculo(id_vehiculo, foto_duenio):
+#     try:
+#         with connectionBD() as conexion_MySQLdb:
+#             with conexion_MySQLdb.cursor(dictionary=True) as cursor:
+#                 querySQL = "DELETE FROM tbl_vehiculos WHERE id_vehiculo=%s"
+#                 cursor.execute(querySQL, (id_vehiculo,))
+#                 conexion_MySQLdb.commit()
+#                 resultado_eliminar = cursor.rowcount
+
+#                 if resultado_eliminar:
+#                     # Eliminadon foto_empleado desde el directorio
+#                     basepath = path.dirname(__file__)
+#                     url_File = path.join(
+#                         basepath, '../static/fotos_empleados', foto_duenio)
+
+#                     if path.exists(url_File):
+#                         remove(url_File)  # Borrar foto desde la carpeta
+
+#         return resultado_eliminar
+#     except Exception as e:
+#         print(f"Error en eliminarEmpleado : {e}")
+#         return []
+
+def eliminarVehiculo(id_vehiculo):
     try:
         with connectionBD() as conexion_MySQLdb:
             with conexion_MySQLdb.cursor(dictionary=True) as cursor:
-                querySQL = "DELETE FROM tbl_empleados WHERE id_empleado=%s"
-                cursor.execute(querySQL, (id_empleado,))
+                querySQL = "DELETE FROM tbl_vehiculos WHERE id_vehiculo=%s"
+                cursor.execute(querySQL, (id_vehiculo,))
                 conexion_MySQLdb.commit()
                 resultado_eliminar = cursor.rowcount
 
-                if resultado_eliminar:
-                    # Eliminadon foto_empleado desde el directorio
-                    basepath = path.dirname(__file__)
-                    url_File = path.join(
-                        basepath, '../static/fotos_empleados', foto_empleado)
-
-                    if path.exists(url_File):
-                        remove(url_File)  # Borrar foto desde la carpeta
-
-        return resultado_eliminar
+        if resultado_eliminar > 0:
+            return resultado_eliminar
+        else:
+            return -1  # Devolver un valor que indique que no se eliminó ningún registro
     except Exception as e:
-        print(f"Error en eliminarEmpleado : {e}")
-        return []
+        print(f"Error en eliminarVehiculo: {e}")
+        raise  # Relanzar la excepción para que la vista de Flask pueda manejarla
 
+
+
+    
 
 # Eliminar usuario
 def eliminarUsuario(id):
@@ -472,3 +493,13 @@ def eliminarUsuario(id):
     except Exception as e:
         print(f"Error en eliminarUsuario : {e}")
         return []
+
+
+
+
+
+
+
+
+
+
