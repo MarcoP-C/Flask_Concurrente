@@ -69,14 +69,15 @@ def viewBuscarEmpleadoBD():
         return jsonify({'fin': 0})
 
 
-@app.route("/editar-empleado/<int:id>", methods=['GET'])
-def viewEditarEmpleado(id):
+@app.route("/editar-empleado/<int:id_vehiculo>", methods=['GET'])
+def viewEditarEmpleado(id_vehiculo):
+    print(f"ID del vehículo recibido: {id_vehiculo}")  # Imprime para verificar el ID recibido
     if 'conectado' in session:
-        respuestaEmpleado = buscarEmpleadoUnico(id)
-        if respuestaEmpleado:
-            return render_template(f'{PATH_URL}/form_empleado_update.html', respuestaEmpleado=respuestaEmpleado)
+        respuestaVehiculo = buscarEmpleadoUnico(id_vehiculo)
+        if respuestaVehiculo:
+            return render_template(f'{PATH_URL}/form_empleado_update.html', respuestaVehiculo=respuestaVehiculo)
         else:
-            flash('El empleado no existe.', 'error')
+            flash('El empleado no existe1.', 'error')
             return redirect(url_for('inicio'))
     else:
         flash('Primero debes iniciar sesión.', 'error')
@@ -88,7 +89,7 @@ def viewEditarEmpleado(id):
 def actualizarEmpleado():
     resultData = procesar_actualizacion_form(request)
     if resultData:
-        return redirect(url_for('lista_empleados'))
+        return redirect(url_for('lista_vehiculos'))
 
 
 @app.route("/lista-de-usuarios", methods=['GET'])

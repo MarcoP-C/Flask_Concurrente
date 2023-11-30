@@ -274,27 +274,27 @@ def buscarEmpleadoBD(search):
         return []
 
 
-def buscarEmpleadoUnico(id):
+def buscarEmpleadoUnico(id_vehiculo):
     try:
         with connectionBD() as conexion_MySQLdb:
             with conexion_MySQLdb.cursor(dictionary=True) as mycursor:
                 querySQL = ("""
                         SELECT 
-                            e.id_empleado,
-                            e.nombre_empleado, 
-                            e.apellido_empleado,
-                            e.sexo_empleado,
-                            e.telefono_empleado,
-                            e.email_empleado,
-                            e.profesion_empleado,
-                            e.salario_empleado,
-                            e.foto_empleado
-                        FROM tbl_empleados AS e
-                        WHERE e.id_empleado =%s LIMIT 1
+                            e.id_vehiculo,
+                            e.nombre_duenio, 
+                            e.sexo_duenio,
+                            e.marca_auto,
+                            e.modelo_auto,
+                            e.factura,
+                            e.tarjeta_circulacion,
+                            e.email_duenio,
+                            e.foto_duenio
+                        FROM tbl_vehiculos AS e
+                        WHERE e.id_vehiculo =%s LIMIT 1
                     """)
-                mycursor.execute(querySQL, (id,))
-                empleado = mycursor.fetchone()
-                return empleado
+                mycursor.execute(querySQL, (id_vehiculo,))
+                vehiculo = mycursor.fetchone()
+                return vehiculo
 
     except Exception as e:
         print(f"Ocurrió un error en def buscarEmpleadoUnico: {e}")
@@ -436,8 +436,6 @@ def eliminarUsuario(id):
     except Exception as e:
         print(f"Error en eliminarUsuario : {e}")
         return []
-
-
 
 
 

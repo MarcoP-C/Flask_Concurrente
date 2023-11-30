@@ -4,7 +4,7 @@
   <td>{{ vehiculo.nombre_duenio }}</td>
   <td>{{ vehiculo.sexo_duenio }}</td>
   <td>{{ vehiculo.marca_auto }}</td>
-  <td>$ {{ vehiculo.modelo_auto}}</td>
+  <td>{{ vehiculo.modelo_auto}}</td>
   <td>
     <a
       href="/detalles-vehiculo/{{ vehiculo.id_vehiculo}}"
@@ -20,7 +20,7 @@
       Ver detalles
     </a>
     <a
-      href="{{ url_for('viewEditarEmpleado', id = vehiculo.id_vehiculo) }}"
+      href="{{ url_for('viewEditarEmpleado', id_vehiculo = vehiculo.id_vehiculo) }}"
       class="btn btn-success btn-sm"
       tooltip="Actualizar Registro">
       <i class="bi bi-arrow-clockwise"></i>
