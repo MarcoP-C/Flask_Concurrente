@@ -127,7 +127,7 @@ def sql_lista_vehiculosBD():
         return None
 
 
-# Detalles del Empleado
+# Detalles del Vehiculo
 def sql_detalles_vehiculosBD(idVehiculo):
     try:
         with connectionBD() as conexion_MySQLdb:
@@ -305,54 +305,56 @@ def procesar_actualizacion_form(data):
     try:
         with connectionBD() as conexion_MySQLdb:
             with conexion_MySQLdb.cursor(dictionary=True) as cursor:
-                nombre_empleado = data.form['nombre_empleado']
-                apellido_empleado = data.form['apellido_empleado']
-                sexo_empleado = data.form['sexo_empleado']
-                telefono_empleado = data.form['telefono_empleado']
-                email_empleado = data.form['email_empleado']
-                profesion_empleado = data.form['profesion_empleado']
+                nombre_duenio = data.form['nombre_duenio']
+                sexo_duenio = data.form['sexo_duenio']
+                marca_auto = data.form['marca_auto']
+                modelo_auto = data.form['modelo_auto']
+                factura = data.form['factura']
+                tarjeta_circulacion = data.form['tarjeta_circulacion']
+                email_duenio = data.form['email_duenio']
+                foto_duenio = data.form['foto_duenio']
 
-                salario_sin_puntos = re.sub(
-                    '[^0-9]+', '', data.form['salario_empleado'])
-                salario_empleado = int(salario_sin_puntos)
-                id_empleado = data.form['id_empleado']
+                # salario_sin_puntos = re.sub(
+                #     '[^0-9]+', '', data.form['salario_empleado'])
+                # salario_empleado = int(salario_sin_puntos)
+                id_vehiculo = data.form['id_vehiculo']
 
-                if data.files['foto_empleado']:
-                    file = data.files['foto_empleado']
-                    fotoForm = procesar_imagen_perfil(file)
+                # if data.files['foto_empleado']:
+                #     file = data.files['foto_empleado']
+                #     fotoForm = procesar_imagen_perfil(file)
 
-                    querySQL = """
-                        UPDATE tbl_empleados
-                        SET 
-                            nombre_empleado = %s,
-                            apellido_empleado = %s,
-                            sexo_empleado = %s,
-                            telefono_empleado = %s,
-                            email_empleado = %s,
-                            profesion_empleado = %s,
-                            salario_empleado = %s,
-                            foto_empleado = %s
-                        WHERE id_empleado = %s
+                querySQL = """
+                    UPDATE tbl_vehiculos
+                    SET 
+                        nombre_duenio = %s,
+                        sexo_duenio = %s,
+                        marca_auto = %s,
+                        modelo_auto = %s,
+                        factura = %s,
+                        tarjeta_circulacion = %s,
+                        email_duenio = %s,
+                        foto_duenio = %s
+                    WHERE id_vehiculo = %s                    
                     """
-                    values = (nombre_empleado, apellido_empleado, sexo_empleado,
-                              telefono_empleado, email_empleado, profesion_empleado,
-                              salario_empleado, fotoForm, id_empleado)
-                else:
-                    querySQL = """
-                        UPDATE tbl_empleados
-                        SET 
-                            nombre_empleado = %s,
-                            apellido_empleado = %s,
-                            sexo_empleado = %s,
-                            telefono_empleado = %s,
-                            email_empleado = %s,
-                            profesion_empleado = %s,
-                            salario_empleado = %s
-                        WHERE id_empleado = %s
-                    """
-                    values = (nombre_empleado, apellido_empleado, sexo_empleado,
-                              telefono_empleado, email_empleado, profesion_empleado,
-                              salario_empleado, id_empleado)
+                values = (nombre_duenio, sexo_duenio, marca_auto,
+                          modelo_auto, factura, tarjeta_circulacion,
+                          email_duenio, foto_duenio, id_vehiculo)
+                # else:
+                #     querySQL = """
+                #         UPDATE tbl_empleados
+                #         SET 
+                #             nombre_empleado = %s,
+                #             apellido_empleado = %s,
+                #             sexo_empleado = %s,
+                #             telefono_empleado = %s,
+                #             email_empleado = %s,
+                #             profesion_empleado = %s,
+                #             salario_empleado = %s
+                #         WHERE id_empleado = %s
+                #     """
+                #     values = (nombre_empleado, apellido_empleado, sexo_empleado,
+                #               telefono_empleado, email_empleado, profesion_empleado,
+                #               salario_empleado, id_empleado)
 
                 cursor.execute(querySQL, values)
                 conexion_MySQLdb.commit()

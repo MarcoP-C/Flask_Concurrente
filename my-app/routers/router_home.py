@@ -84,12 +84,61 @@ def viewEditarEmpleado(id_vehiculo):
         return redirect(url_for('inicio'))
 
 
-# Recibir formulario para actulizar informacion de empleado
+#Recibir formulario para actulizar informacion de empleado
 @app.route('/actualizar-empleado', methods=['POST'])
 def actualizarEmpleado():
     resultData = procesar_actualizacion_form(request)
     if resultData:
         return redirect(url_for('lista_vehiculos'))
+
+
+# @app.route('/actualizar-empleado/<int:id_vehiculo>', methods=['POST'])
+# def actualizarEmpleado(id_vehiculo):
+#     try:
+#         # Obtener los datos del formulario enviado
+#         nombre_duenio = request.form['nombre_duenio']
+#         sexo_duenio = request.form['sexo_duenio']
+#         marca_auto = request.form['marca_auto']
+#         modelo_auto = request.form['modelo_auto']
+#         factura = request.form['factura']
+#         tarjeta_circulacion = request.form['tarjeta_circulacion']
+#         email_duenio = request.form['email_duenio']
+#         foto_duenio = request.form['foto_duenio']
+
+#         # Realizar la actualización en la base de datos utilizando los datos obtenidos del formulario
+#         with connectionBD() as conexion_MySQLdb:
+#             with conexion_MySQLdb.cursor(dictionary=True) as cursor:
+#                 querySQL = """
+#                     UPDATE tbl_vehiculos
+#                     SET 
+#                         nombre_duenio = %s,
+#                         sexo_duenio = %s,
+#                         marca_auto = %s,
+#                         modelo_auto = %s,
+#                         factura = %s,
+#                         tarjeta_circulacion = %s,
+#                         email_duenio = %s,
+#                         foto_duenio = %s
+#                     WHERE id_vehiculo = %s
+#                 """
+#                 values = (
+#                     nombre_duenio, sexo_duenio, marca_auto, modelo_auto,
+#                     factura, tarjeta_circulacion, email_duenio, foto_duenio, id_vehiculo
+#                 )
+
+#                 cursor.execute(querySQL, values)
+#                 conexion_MySQLdb.commit()
+
+#         # Redirigir a la página de lista de vehículos después de actualizar exitosamente
+#         return redirect(url_for('lista_vehiculos'))
+#     except KeyError:
+#         flash('Se enviaron datos incorrectos', 'error')
+#         # Manejar el error, redirigir a la página o realizar otras acciones necesarias
+#         return redirect(url_for('error_page'))
+#     except Exception as e:
+#         flash(f'Ocurrió un error al actualizar: {str(e)}', 'error')
+#         # Manejar el error, redirigir a la página o realizar otras acciones necesarias
+#         return redirect(url_for('error_page'))
 
 
 @app.route("/lista-de-usuarios", methods=['GET'])
