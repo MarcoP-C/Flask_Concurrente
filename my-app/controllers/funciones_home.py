@@ -130,7 +130,7 @@ def sql_lista_vehiculosBD():
         return None
 
 
-# Detalles del Empleado
+# Detalles del Vehiculo
 def sql_detalles_vehiculosBD(idVehiculo):
     try:
         with connectionBD() as conexion_MySQLdb:
@@ -360,56 +360,36 @@ def buscarEmpleadoUnico(id_vehiculo):
 
 def procesar_actualizacion_form(data):
     try:
+        #Obtener los datos del formulario enviado
+        nombre_duenio = data.form['nombre_duenio']
+        sexo_duenio = data.form['sexo_duenio']
+        marca_auto = data.form['marca_auto']
+        modelo_auto = data.form['modelo_auto']
+        factura = data.form['factura']
+        tarjeta_circulacion = data.form['tarjeta_circulacion']
+        email_duenio = data.form['email_duenio']
+        # foto_duenio = data.form['foto_duenio']
+        id_vehiculo = data.form['id_vehiculo']
+
+        #Realizar la actualización en la base de datos utilizando los datos obtenidos del formulario
         with connectionBD() as conexion_MySQLdb:
             with conexion_MySQLdb.cursor(dictionary=True) as cursor:
-                nombre_empleado = data.form['nombre_empleado']
-                apellido_empleado = data.form['apellido_empleado']
-                sexo_empleado = data.form['sexo_empleado']
-                telefono_empleado = data.form['telefono_empleado']
-                email_empleado = data.form['email_empleado']
-                profesion_empleado = data.form['profesion_empleado']
-
-                salario_sin_puntos = re.sub(
-                    '[^0-9]+', '', data.form['salario_empleado'])
-                salario_empleado = int(salario_sin_puntos)
-                id_empleado = data.form['id_empleado']
-
-                if data.files['foto_empleado']:
-                    file = data.files['foto_empleado']
-                    fotoForm = procesar_imagen_perfil(file)
-
-                    querySQL = """
-                        UPDATE tbl_empleados
-                        SET 
-                            nombre_empleado = %s,
-                            apellido_empleado = %s,
-                            sexo_empleado = %s,
-                            telefono_empleado = %s,
-                            email_empleado = %s,
-                            profesion_empleado = %s,
-                            salario_empleado = %s,
-                            foto_empleado = %s
-                        WHERE id_empleado = %s
-                    """
-                    values = (nombre_empleado, apellido_empleado, sexo_empleado,
-                              telefono_empleado, email_empleado, profesion_empleado,
-                              salario_empleado, fotoForm, id_empleado)
-                else:
-                    querySQL = """
-                        UPDATE tbl_empleados
-                        SET 
-                            nombre_empleado = %s,
-                            apellido_empleado = %s,
-                            sexo_empleado = %s,
-                            telefono_empleado = %s,
-                            email_empleado = %s,
-                            profesion_empleado = %s,
-                            salario_empleado = %s
-                        WHERE id_empleado = %s
-                    """
-                    values = (nombre_empleado, apellido_empleado, sexo_empleado,
-                              telefono_empleado, email_empleado, profesion_empleado,
-                              salario_empleado, id_empleado)
+                querySQL = """
+                    UPDATE tbl_vehiculos
+                    SET 
+                        nombre_duenio = %s,
+                        sexo_duenio = %s,
+                        marca_auto = %s,
+                        modelo_auto = %s,
+                        factura = %s,
+                        tarjeta_circulacion = %s,
+                        email_duenio = %s
+                    WHERE id_vehiculo = %s
+                """
+                values = (
+                    nombre_duenio, sexo_duenio, marca_auto, modelo_auto,
+                    factura, tarjeta_circulacion, email_duenio, id_vehiculo
+                )
 
                 cursor.execute(querySQL, values)
                 conexion_MySQLdb.commit()
@@ -500,6 +480,54 @@ def eliminarUsuario(id):
 
 
 
+
+
+
+def actualizarVehiculo(data):
+  try:
+      # Obtener los datos del formulario enviado
+      nombre_duenio = data.form['nombre_duenio']
+      sexo_duenio = data.form['sexo_duenio']
+      marca_auto = data.form['marca_auto']
+      modelo_auto = data.form['modelo_auto']
+      factura = data.form['factura']
+      tarjeta_circulacion = data.form['tarjeta_circulacion']
+      email_duenio = data.form['email_duenio']
+      foto_duenio = data.form['foto_duenio']
+      id_vehiculo = data.form['id_vehiculo']
+
+      # Realizar la actualización en la base de datos utilizando los datos obtenidos del formulario
+      with connectionBD() as conexion_MySQLdb:
+          with conexion_MySQLdb.cursor(dictionary=True) as cursor:
+              querySQL = """
+                UPDATE tbl_vehiculos
+                SET 
+                    nombre_duenio = %s,
+                    sexo_duenio = %s,
+                    marca_auto = %s,
+                    modelo_auto = %s,
+                    factura = %s,
+                    tarjeta_circulacion = %s,
+                    email_duenio = %s,
+                    foto_duenio = %s
+                WHERE id_vehiculo = %s
+              """
+              values = (
+                nombre_duenio, sexo_duenio, marca_auto, modelo_auto,
+                factura, tarjeta_circulacion, email_duenio, foto_duenio, id_vehiculo
+              )
+
+              cursor.execute(querySQL, values)
+              conexion_MySQLdb.commit()
+
+      # Redirigir a la página de lista de vehículos después de actualizar exitosamente
+      return cursor.rowcount or []
+  except KeyError:
+      print('Se enviaron datos incorrectos')
+      return None
+  except Exception as e:
+      print(f'Ocurrió un error al actualizar: {str(e)}')
+      return None
 
 
 
