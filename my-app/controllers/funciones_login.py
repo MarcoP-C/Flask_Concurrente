@@ -140,7 +140,7 @@ def updatePefilSinPass(id_user, name_surname):
     except Exception as e:
         print(f"Ocurrió un error en la funcion updatePefilSinPass: {e}")
         return []
-
+ 
 
 def dataLoginSesion():
     inforLogin = {

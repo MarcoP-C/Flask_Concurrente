@@ -1,13 +1,10 @@
+
 # Para subir archivo tipo foto al servidor
 from werkzeug.utils import secure_filename
 import uuid  # Modulo de python para crear un string
 
 from conexion.conexionBD import connectionBD  # Conexión a BD
-import sys
-sys.path.append(r'my-app/conexion/conexionBD.py')
 
-
-import threading
 import datetime
 import re
 import os
@@ -16,47 +13,35 @@ from os import remove  # Modulo  para remover archivo
 from os import path  # Modulo para obtener la ruta o directorio
 
 
-
 import openpyxl  # Para generar el excel
 # biblioteca o modulo send_file para forzar la descarga
 from flask import send_file
 
-# Creamos un objeto Lock para sincronizar el acceso a la conexión a la base de datos
-lock = threading.Lock()
 
-def procesar_form_vehiculo(dataForm):
+def procesar_form_empleado(dataForm, foto_perfil):
     # Formateando Salario
-    #salario_sin_puntos = re.sub('[^0-9]+', '', dataForm['salario_empleado'])
-    # Convertir salario a INT
-    #salario_entero = int(salario_sin_puntos)
+    salario_sin_puntos = re.sub('[^0-9]+', '', dataForm['salario_empleado'])
+    # convertir salario a INT
+    salario_entero = int(salario_sin_puntos)
 
-    #result_foto_perfil = procesar_imagen_perfil(foto_perfil)
+    result_foto_perfil = procesar_imagen_perfil(foto_perfil)
+    try:
+        with connectionBD() as conexion_MySQLdb:
+            with conexion_MySQLdb.cursor(dictionary=True) as cursor:
 
-    resultado_insert = -1  # Valor predeterminado en caso de error
+                sql = "INSERT INTO tbl_empleados (nombre_empleado, apellido_empleado, sexo_empleado, telefono_empleado, email_empleado, profesion_empleado, foto_empleado, salario_empleado) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
 
-    def ejecutar_procesamiento():
-        nonlocal resultado_insert
-        try:
-            with connectionBD() as conexion_MySQLdb:
-                with conexion_MySQLdb.cursor(dictionary=True) as cursor:
-                    sql = "INSERT INTO tbl_vehiculos (nombre_duenio, sexo_duenio, marca_auto, modelo_auto, factura, tarjeta_circulacion, email_duenio, foto_duenio) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+                # Creando una tupla con los valores del INSERT
+                valores = (dataForm['nombre_empleado'], dataForm['apellido_empleado'], dataForm['sexo_empleado'],
+                           dataForm['telefono_empleado'], dataForm['email_empleado'], dataForm['profesion_empleado'], result_foto_perfil, salario_entero)
+                cursor.execute(sql, valores)
 
-                    valores = (dataForm['nombre_duenio'], dataForm['sexo_duenio'], dataForm['marca_auto'],
-                               dataForm['modelo_auto'], dataForm['factura'], dataForm['tarjeta_circulacion'],dataForm['email_duenio'], dataForm['foto_duenio'])
-                    
-                    with lock:
-                        cursor.execute(sql, valores)
-                        conexion_MySQLdb.commit()
-                        resultado_insert = cursor.rowcount
-        except Exception as e:
-            print(f'Se produjo un error en procesar_form_empleado: {str(e)}')
+                conexion_MySQLdb.commit()
+                resultado_insert = cursor.rowcount
+                return resultado_insert
 
-    # Crear un hilo para ejecutar el procesamiento
-    thread = threading.Thread(target=ejecutar_procesamiento)
-    thread.start()
-    thread.join()  # Esperar a que el hilo termine su ejecución
-
-    return resultado_insert
+    except Exception as e:
+        return f'Se produjo un error en procesar_form_empleado: {str(e)}'
 
 
 def procesar_imagen_perfil(foto):
@@ -91,71 +76,58 @@ def procesar_imagen_perfil(foto):
 
 
 # Lista de Empleados
-def sql_lista_vehiculosBD():
+def sql_lista_empleadosBD():
     try:
-        empleadosBD = None
-
-        def ejecutar_consulta():
-            nonlocal empleadosBD
-            try:
-                with connectionBD() as conexion_MySQLdb:
-                    with conexion_MySQLdb.cursor(dictionary=True) as cursor:
-                        querySQL = (f"""
-                            SELECT 
-                                e.id_vehiculo,
-                                e.nombre_duenio, 
-                                CASE
-                                    WHEN e.sexo_duenio = 1 THEN 'Masculino'
-                                    ELSE 'Femenino'
-                                END AS sexo_duenio,
-                                e.marca_auto,
-                                e.modelo_auto,
-                                e.factura
-                                
-                            FROM tbl_vehiculos AS e
-                            ORDER BY e.id_vehiculo DESC
-                            """)
-                        cursor.execute(querySQL)
-                        empleadosBD = cursor.fetchall()
-            except Exception as e:
-                print(f"Error en la función sql_lista_empleadosBD: {e}")
-
-        thread = threading.Thread(target=ejecutar_consulta)
-        thread.start()
-        thread.join()  # Esperar a que el hilo termine su ejecución
-
+        with connectionBD() as conexion_MySQLdb:
+            with conexion_MySQLdb.cursor(dictionary=True) as cursor:
+                querySQL = (f"""
+                    SELECT 
+                        e.id_empleado,
+                        e.nombre_empleado, 
+                        e.apellido_empleado,
+                        e.salario_empleado,
+                        e.foto_empleado,
+                        CASE
+                            WHEN e.sexo_empleado = 1 THEN 'Masculino'
+                            ELSE 'Femenino'
+                        END AS sexo_empleado
+                    FROM tbl_empleados AS e
+                    ORDER BY e.id_empleado DESC
+                    """)
+                cursor.execute(querySQL,)
+                empleadosBD = cursor.fetchall()
         return empleadosBD
     except Exception as e:
-        print(f"Error general en sql_lista_empleadosBD: {e}")
+        print(
+            f"Errro en la función sql_lista_empleadosBD: {e}")
         return None
 
 
-# Detalles del Vehiculo
-def sql_detalles_vehiculosBD(idVehiculo):
+# Detalles del Empleado
+def sql_detalles_empleadosBD(idEmpleado):
     try:
         with connectionBD() as conexion_MySQLdb:
             with conexion_MySQLdb.cursor(dictionary=True) as cursor:
                 querySQL = ("""
                     SELECT 
-                        e.id_vehiculo,
-                        e.nombre_duenio, 
+                        e.id_empleado,
+                        e.nombre_empleado, 
+                        e.apellido_empleado,
+                        e.salario_empleado,
                         CASE
-                            WHEN e.sexo_duenio = 1 THEN 'Masculino'
+                            WHEN e.sexo_empleado = 1 THEN 'Masculino'
                             ELSE 'Femenino'
-                        END AS sexo_duenio,
-                        e.marca_auto,
-                        e.modelo_auto,
-                        
-                        e.factura, 
-                        e.tarjeta_circulacion,
-                        e.email_duenio,
-                        e.foto_duenio,
+                        END AS sexo_empleado,
+                        e.telefono_empleado, 
+                        e.email_empleado,
+                        e.profesion_empleado,
+                        e.foto_empleado,
                         DATE_FORMAT(e.fecha_registro, '%Y-%m-%d %h:%i %p') AS fecha_registro
-                    FROM tbl_vehiculos AS e
-                    WHERE id_vehiculo =%s
-                    ORDER BY e.id_vehiculo DESC
+                    FROM tbl_empleados AS e
+                    WHERE id_empleado =%s
+                    ORDER BY e.id_empleado DESC
                     """)
-                cursor.execute(querySQL, (idVehiculo,))
+                cursor.execute(querySQL, (idEmpleado,))
                 empleadosBD = cursor.fetchone()
         return empleadosBD
     except Exception as e:
@@ -194,62 +166,8 @@ def empleadosReporte():
             f"Errro en la función empleadosReporte: {e}")
         return None
 
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
-from openpyxl import load_workbook
-import os
-import datetime
-from flask import send_file
 
-def generarReportePDF():
-    dataEmpleados = empleadosReporte()
-
-    # Crear el archivo PDF
-    fecha_actual = datetime.datetime.now()
-    archivoPDF = f"Reporte_empleados_{fecha_actual.strftime('%Y_%m_%d')}.pdf"
-    carpeta_descarga = "../static/downloads-pdf"
-    ruta_descarga = os.path.join(os.path.dirname(
-        os.path.abspath(__file__)), carpeta_descarga)
-
-    try:
-        os.makedirs(ruta_descarga)
-        os.chmod(ruta_descarga, 0o755)
-    except FileExistsError:
-        pass
-
-    ruta_archivo_pdf = os.path.join(ruta_descarga, archivoPDF)
-    pdf = canvas.Canvas(ruta_archivo_pdf, pagesize=letter)
-
-    # Configurar el tamaño de la fuente y otros estilos según sea necesario
-    pdf.setFont("Helvetica", 11)
-
-    # Agregar la fila de encabezado con los títulos al PDF
-    for col_num, titulo in enumerate(("Nombre", "Apellido", "Sexo", "Telefono", "Email",  "Fecha de Ingreso"), start=1):
-        pdf.drawString(col_num * 70, 750, titulo)
-
-    # Agregar los registros al PDF
-    for fila_num, registro in enumerate(dataEmpleados, start=2):
-        # Obtener los datos del registro
-        nombre_empleado = registro['nombre_empleado']
-        apellido_empleado = registro['apellido_empleado']
-        sexo_empleado = registro['sexo_empleado']
-        telefono_empleado = registro['telefono_empleado']
-        email_empleado = registro['email_empleado']
-        #profesion_empleado = registro['profesion_empleado']
-       # salario_empleado = registro['salario_empleado']
-        fecha_registro = registro['fecha_registro']
-
-        # Agregar el contenido a la posición deseada en el PDF
-        for col_num, valor in enumerate((nombre_empleado, apellido_empleado ,sexo_empleado, telefono_empleado, email_empleado,  fecha_registro), start=1):
-            pdf.drawString(col_num * 70, (740 - fila_num * 30), str(valor))
-
-    # Guardar y cerrar el PDF
-    pdf.save()
-
-    # Enviar el archivo PDF como respuesta HTTP
-    return send_file(ruta_archivo_pdf, as_attachment=True)
-
-'''def generarReporteExcel():
+def generarReporteExcel():
     dataEmpleados = empleadosReporte()
     wb = openpyxl.Workbook()
     hoja = wb.active
@@ -299,7 +217,7 @@ def generarReportePDF():
     wb.save(ruta_archivo)
 
     # Enviar el archivo como respuesta HTTP
-    return send_file(ruta_archivo, as_attachment=True)'''
+    return send_file(ruta_archivo, as_attachment=True)
 
 
 def buscarEmpleadoBD(search):
@@ -308,18 +226,17 @@ def buscarEmpleadoBD(search):
             with conexion_MySQLdb.cursor(dictionary=True) as mycursor:
                 querySQL = ("""
                         SELECT 
-                            e.id_vehiculo,
-                            e.nombre_duenio, 
+                            e.id_empleado,
+                            e.nombre_empleado, 
+                            e.apellido_empleado,
+                            e.salario_empleado,
                             CASE
-                                WHEN e.sexo_duenio = 1 THEN 'Masculino'
+                                WHEN e.sexo_empleado = 1 THEN 'Masculino'
                                 ELSE 'Femenino'
-                            END AS sexo_duenio,
-                            e.marca_auto,
-                            e.modelo_auto
-                            
-                        FROM tbl_vehiculos AS e
-                        WHERE e.nombre_duenio LIKE %s 
-                        ORDER BY e.id_vehiculo DESC
+                            END AS sexo_empleado 
+                        FROM tbl_empleados AS e
+                        WHERE e.nombre_empleado LIKE %s 
+                        ORDER BY e.id_empleado DESC
                     """)
                 search_pattern = f"%{search}%"  # Agregar "%" alrededor del término de búsqueda
                 mycursor.execute(querySQL, (search_pattern,))
@@ -331,27 +248,27 @@ def buscarEmpleadoBD(search):
         return []
 
 
-def buscarEmpleadoUnico(id_vehiculo):
+def buscarEmpleadoUnico(id):
     try:
         with connectionBD() as conexion_MySQLdb:
             with conexion_MySQLdb.cursor(dictionary=True) as mycursor:
                 querySQL = ("""
                         SELECT 
-                            e.id_vehiculo,
-                            e.nombre_duenio, 
-                            e.sexo_duenio,
-                            e.marca_auto,
-                            e.modelo_auto,
-                            e.factura,
-                            e.tarjeta_circulacion,
-                            e.email_duenio,
-                            e.foto_duenio
-                        FROM tbl_vehiculos AS e
-                        WHERE e.id_vehiculo =%s LIMIT 1
+                            e.id_empleado,
+                            e.nombre_empleado, 
+                            e.apellido_empleado,
+                            e.sexo_empleado,
+                            e.telefono_empleado,
+                            e.email_empleado,
+                            e.profesion_empleado,
+                            e.salario_empleado,
+                            e.foto_empleado
+                        FROM tbl_empleados AS e
+                        WHERE e.id_empleado =%s LIMIT 1
                     """)
-                mycursor.execute(querySQL, (id_vehiculo,))
-                vehiculo = mycursor.fetchone()
-                return vehiculo
+                mycursor.execute(querySQL, (id,))
+                empleado = mycursor.fetchone()
+                return empleado
 
     except Exception as e:
         print(f"Ocurrió un error en def buscarEmpleadoUnico: {e}")
@@ -360,36 +277,56 @@ def buscarEmpleadoUnico(id_vehiculo):
 
 def procesar_actualizacion_form(data):
     try:
-        #Obtener los datos del formulario enviado
-        nombre_duenio = data.form['nombre_duenio']
-        sexo_duenio = data.form['sexo_duenio']
-        marca_auto = data.form['marca_auto']
-        modelo_auto = data.form['modelo_auto']
-        factura = data.form['factura']
-        tarjeta_circulacion = data.form['tarjeta_circulacion']
-        email_duenio = data.form['email_duenio']
-        # foto_duenio = data.form['foto_duenio']
-        id_vehiculo = data.form['id_vehiculo']
-
-        #Realizar la actualización en la base de datos utilizando los datos obtenidos del formulario
         with connectionBD() as conexion_MySQLdb:
             with conexion_MySQLdb.cursor(dictionary=True) as cursor:
-                querySQL = """
-                    UPDATE tbl_vehiculos
-                    SET 
-                        nombre_duenio = %s,
-                        sexo_duenio = %s,
-                        marca_auto = %s,
-                        modelo_auto = %s,
-                        factura = %s,
-                        tarjeta_circulacion = %s,
-                        email_duenio = %s
-                    WHERE id_vehiculo = %s
-                """
-                values = (
-                    nombre_duenio, sexo_duenio, marca_auto, modelo_auto,
-                    factura, tarjeta_circulacion, email_duenio, id_vehiculo
-                )
+                nombre_empleado = data.form['nombre_empleado']
+                apellido_empleado = data.form['apellido_empleado']
+                sexo_empleado = data.form['sexo_empleado']
+                telefono_empleado = data.form['telefono_empleado']
+                email_empleado = data.form['email_empleado']
+                profesion_empleado = data.form['profesion_empleado']
+
+                salario_sin_puntos = re.sub(
+                    '[^0-9]+', '', data.form['salario_empleado'])
+                salario_empleado = int(salario_sin_puntos)
+                id_empleado = data.form['id_empleado']
+
+                if data.files['foto_empleado']:
+                    file = data.files['foto_empleado']
+                    fotoForm = procesar_imagen_perfil(file)
+
+                    querySQL = """
+                        UPDATE tbl_empleados
+                        SET 
+                            nombre_empleado = %s,
+                            apellido_empleado = %s,
+                            sexo_empleado = %s,
+                            telefono_empleado = %s,
+                            email_empleado = %s,
+                            profesion_empleado = %s,
+                            salario_empleado = %s,
+                            foto_empleado = %s
+                        WHERE id_empleado = %s
+                    """
+                    values = (nombre_empleado, apellido_empleado, sexo_empleado,
+                              telefono_empleado, email_empleado, profesion_empleado,
+                              salario_empleado, fotoForm, id_empleado)
+                else:
+                    querySQL = """
+                        UPDATE tbl_empleados
+                        SET 
+                            nombre_empleado = %s,
+                            apellido_empleado = %s,
+                            sexo_empleado = %s,
+                            telefono_empleado = %s,
+                            email_empleado = %s,
+                            profesion_empleado = %s,
+                            salario_empleado = %s
+                        WHERE id_empleado = %s
+                    """
+                    values = (nombre_empleado, apellido_empleado, sexo_empleado,
+                              telefono_empleado, email_empleado, profesion_empleado,
+                              salario_empleado, id_empleado)
 
                 cursor.execute(querySQL, values)
                 conexion_MySQLdb.commit()
@@ -415,49 +352,29 @@ def lista_usuariosBD():
 
 
 # Eliminar uEmpleado
-# def eliminarVehiculo(id_vehiculo, foto_duenio):
-#     try:
-#         with connectionBD() as conexion_MySQLdb:
-#             with conexion_MySQLdb.cursor(dictionary=True) as cursor:
-#                 querySQL = "DELETE FROM tbl_vehiculos WHERE id_vehiculo=%s"
-#                 cursor.execute(querySQL, (id_vehiculo,))
-#                 conexion_MySQLdb.commit()
-#                 resultado_eliminar = cursor.rowcount
-
-#                 if resultado_eliminar:
-#                     # Eliminadon foto_empleado desde el directorio
-#                     basepath = path.dirname(__file__)
-#                     url_File = path.join(
-#                         basepath, '../static/fotos_empleados', foto_duenio)
-
-#                     if path.exists(url_File):
-#                         remove(url_File)  # Borrar foto desde la carpeta
-
-#         return resultado_eliminar
-#     except Exception as e:
-#         print(f"Error en eliminarEmpleado : {e}")
-#         return []
-
-def eliminarVehiculo(id_vehiculo):
+def eliminarEmpleado(id_empleado, foto_empleado):
     try:
         with connectionBD() as conexion_MySQLdb:
             with conexion_MySQLdb.cursor(dictionary=True) as cursor:
-                querySQL = "DELETE FROM tbl_vehiculos WHERE id_vehiculo=%s"
-                cursor.execute(querySQL, (id_vehiculo,))
+                querySQL = "DELETE FROM tbl_empleados WHERE id_empleado=%s"
+                cursor.execute(querySQL, (id_empleado,))
                 conexion_MySQLdb.commit()
                 resultado_eliminar = cursor.rowcount
 
-        if resultado_eliminar > 0:
-            return resultado_eliminar
-        else:
-            return -1  # Devolver un valor que indique que no se eliminó ningún registro
+                if resultado_eliminar:
+                    # Eliminadon foto_empleado desde el directorio
+                    basepath = path.dirname(__file__)
+                    url_File = path.join(
+                        basepath, '../static/fotos_empleados', foto_empleado)
+
+                    if path.exists(url_File):
+                        remove(url_File)  # Borrar foto desde la carpeta
+
+        return resultado_eliminar
     except Exception as e:
-        print(f"Error en eliminarVehiculo: {e}")
-        raise  # Relanzar la excepción para que la vista de Flask pueda manejarla
+        print(f"Error en eliminarEmpleado : {e}")
+        return []
 
-
-
-    
 
 # Eliminar usuario
 def eliminarUsuario(id):
@@ -473,61 +390,3 @@ def eliminarUsuario(id):
     except Exception as e:
         print(f"Error en eliminarUsuario : {e}")
         return []
-
-
-
-
-
-
-
-
-
-
-def actualizarVehiculo(data):
-  try:
-      # Obtener los datos del formulario enviado
-      nombre_duenio = data.form['nombre_duenio']
-      sexo_duenio = data.form['sexo_duenio']
-      marca_auto = data.form['marca_auto']
-      modelo_auto = data.form['modelo_auto']
-      factura = data.form['factura']
-      tarjeta_circulacion = data.form['tarjeta_circulacion']
-      email_duenio = data.form['email_duenio']
-      foto_duenio = data.form['foto_duenio']
-      id_vehiculo = data.form['id_vehiculo']
-
-      # Realizar la actualización en la base de datos utilizando los datos obtenidos del formulario
-      with connectionBD() as conexion_MySQLdb:
-          with conexion_MySQLdb.cursor(dictionary=True) as cursor:
-              querySQL = """
-                UPDATE tbl_vehiculos
-                SET 
-                    nombre_duenio = %s,
-                    sexo_duenio = %s,
-                    marca_auto = %s,
-                    modelo_auto = %s,
-                    factura = %s,
-                    tarjeta_circulacion = %s,
-                    email_duenio = %s,
-                    foto_duenio = %s
-                WHERE id_vehiculo = %s
-              """
-              values = (
-                nombre_duenio, sexo_duenio, marca_auto, modelo_auto,
-                factura, tarjeta_circulacion, email_duenio, foto_duenio, id_vehiculo
-              )
-
-              cursor.execute(querySQL, values)
-              conexion_MySQLdb.commit()
-
-      # Redirigir a la página de lista de vehículos después de actualizar exitosamente
-      return cursor.rowcount or []
-  except KeyError:
-      print('Se enviaron datos incorrectos')
-      return None
-  except Exception as e:
-      print(f'Ocurrió un error al actualizar: {str(e)}')
-      return None
-
-
-
