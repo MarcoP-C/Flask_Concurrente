@@ -52,7 +52,7 @@ def detalleVehiculo(idVehiculo=None):
         if idVehiculo is None:
             return redirect(url_for('inicio'))
         else:
-            detalle_vehiculo = sql_detalles_vehiculosBD(idVehiculo) or []
+            detalle_vehiculo = sql_detalles_vehiculoBD(idVehiculo) or []
             return render_template(f'{PATH_URL}/detalles_vehiculo.html', detalle_vehiculo=detalle_vehiculo)
     else:
         flash('Primero debes iniciar sesión.', 'error')
@@ -61,8 +61,8 @@ def detalleVehiculo(idVehiculo=None):
 
 # Buscadon de empleados
 @app.route("/buscando-empleado", methods=['POST'])
-def viewBuscarEmpleadoBD():
-    resultadoBusqueda = buscarEmpleadoBD(request.json['busqueda'])
+def viewBuscarVehiculoBD():
+    resultadoBusqueda = buscarVehiculoBD(request.json['busqueda'])
     if resultadoBusqueda:
         return render_template(f'{PATH_URL}/resultado_busqueda_empleado.html', dataBusqueda=resultadoBusqueda)
     else:
@@ -70,14 +70,14 @@ def viewBuscarEmpleadoBD():
 
 
 @app.route("/editar-empleado/<int:id_vehiculo>", methods=['GET'])
-def viewEditarEmpleado(id_vehiculo):
+def viewEditarVehiculo(id_vehiculo):
     print(f"ID del vehículo recibido: {id_vehiculo}")  # Imprime para verificar el ID recibido
     if 'conectado' in session:
-        respuestaVehiculo = buscarEmpleadoUnico(id_vehiculo)
+        respuestaVehiculo = buscarVehiculoUnico(id_vehiculo)
         if respuestaVehiculo:
             return render_template(f'{PATH_URL}/form_empleado_update.html', respuestaVehiculo=respuestaVehiculo)
         else:
-            flash('El empleado no existe1.', 'error')
+            flash('El Vehiculo no existe1.', 'error')
             return redirect(url_for('inicio'))
     else:
         flash('Primero debes iniciar sesión.', 'error')
