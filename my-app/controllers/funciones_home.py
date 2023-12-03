@@ -127,37 +127,46 @@ def sql_lista_vehiculosBD():
         return None
 
 
-# Detalles del Vehiculo
 def sql_detalles_vehiculosBD(idVehiculo):
     try:
-        with connectionBD() as conexion_MySQLdb:
-            with conexion_MySQLdb.cursor(dictionary=True) as cursor:
-                querySQL = ("""
-                    SELECT 
-                        e.id_vehiculo,
-                        e.nombre_duenio, 
-                        CASE
-                            WHEN e.sexo_duenio = 1 THEN 'Masculino'
-                            ELSE 'Femenino'
-                        END AS sexo_duenio,
-                        e.marca_auto,
-                        e.modelo_auto,
-                        
-                        e.factura, 
-                        e.tarjeta_circulacion,
-                        e.email_duenio,
-                        e.foto_duenio,
-                        DATE_FORMAT(e.fecha_registro, '%Y-%m-%d %h:%i %p') AS fecha_registro
-                    FROM tbl_vehiculos AS e
-                    WHERE id_vehiculo =%s
-                    ORDER BY e.id_vehiculo DESC
-                    """)
-                cursor.execute(querySQL, (idVehiculo,))
-                empleadosBD = cursor.fetchone()
-        return empleadosBD
+        detalles_vehiculo = None
+
+        def ejecutar_consulta():
+            nonlocal detalles_vehiculo
+            try:
+                with connectionBD() as conexion_MySQLdb:
+                    with conexion_MySQLdb.cursor(dictionary=True) as cursor:
+                        querySQL = ("""
+                            SELECT 
+                                e.id_vehiculo,
+                                e.nombre_duenio, 
+                                CASE
+                                    WHEN e.sexo_duenio = 1 THEN 'Masculino'
+                                    ELSE 'Femenino'
+                                END AS sexo_duenio,
+                                e.marca_auto,
+                                e.modelo_auto,
+                                e.factura, 
+                                e.tarjeta_circulacion,
+                                e.email_duenio,
+                                e.foto_duenio,
+                                DATE_FORMAT(e.fecha_registro, '%Y-%m-%d %h:%i %p') AS fecha_registro
+                            FROM tbl_vehiculos AS e
+                            WHERE id_vehiculo = %s
+                            ORDER BY e.id_vehiculo DESC
+                            """)
+                        cursor.execute(querySQL, (idVehiculo,))
+                        detalles_vehiculo = cursor.fetchone()
+            except Exception as e:
+                print(f"Error en la función sql_detalles_vehiculosBD: {e}")
+
+        thread = threading.Thread(target=ejecutar_consulta)
+        thread.start()
+        thread.join()  # Esperar a que el hilo termine su ejecución
+
+        return detalles_vehiculo
     except Exception as e:
-        print(
-            f"Errro en la función sql_detalles_empleadosBD: {e}")
+        print(f"Error general en sql_detalles_vehiculosBD: {e}")
         return None
 
 
@@ -247,58 +256,100 @@ def generarReporteExcel():
 
 def buscarEmpleadoBD(search):
     try:
-        with connectionBD() as conexion_MySQLdb:
-            with conexion_MySQLdb.cursor(dictionary=True) as mycursor:
-                querySQL = ("""
-                        SELECT 
-                            e.id_vehiculo,
-                            e.nombre_duenio, 
-                            CASE
-                                WHEN e.sexo_duenio = 1 THEN 'Masculino'
-                                ELSE 'Femenino'
-                            END AS sexo_duenio,
-                            e.marca_auto,
-                            e.modelo_auto
-                            
-                        FROM tbl_vehiculos AS e
-                        WHERE e.nombre_duenio LIKE %s 
-                        ORDER BY e.id_vehiculo DESC
-                    """)
-                search_pattern = f"%{search}%"  # Agregar "%" alrededor del término de búsqueda
-                mycursor.execute(querySQL, (search_pattern,))
-                resultado_busqueda = mycursor.fetchall()
-                return resultado_busqueda
+        resultado_busqueda = []
 
+        def ejecutar_busqueda():
+            """
+            Función interna para ejecutar la búsqueda en un hilo separado.
+
+            Esta función encapsula la lógica de la búsqueda y se ejecuta en un hilo separado
+            para evitar bloquear el hilo principal mientras se realiza la búsqueda en la base de datos.
+            """
+            nonlocal resultado_busqueda
+            try:
+                with connectionBD() as conexion_MySQLdb:
+                    with conexion_MySQLdb.cursor(dictionary=True) as mycursor:
+                        querySQL = ("""
+                            SELECT 
+                                e.id_vehiculo,
+                                e.nombre_duenio, 
+                                CASE
+                                    WHEN e.sexo_duenio = 1 THEN 'Masculino'
+                                    ELSE 'Femenino'
+                                END AS sexo_duenio,
+                                e.marca_auto,
+                                e.modelo_auto
+                            FROM tbl_vehiculos AS e
+                            WHERE e.nombre_duenio LIKE %s 
+                            ORDER BY e.id_vehiculo DESC
+                        """)
+                        search_pattern = f"%{search}%"  # Agregar "%" alrededor del término de búsqueda
+                        mycursor.execute(querySQL, (search_pattern,))
+                        resultados_completos = mycursor.fetchall()
+
+                        # Aplicar el lock para filtrar los resultados
+                        with lock:
+                            resultado_busqueda = [res for res in resultados_completos if res['nombre_duenio'].lower().find(search.lower()) != -1]
+            except Exception as e:
+                print(f"Ocurrió un error en la función buscarEmpleadoBD: {e}")
+
+        # Crear un hilo para ejecutar la búsqueda
+        thread = threading.Thread(target=ejecutar_busqueda)
+        thread.start()
+        thread.join()  # Esperar a que el hilo termine su ejecución
+
+        return resultado_busqueda
     except Exception as e:
-        print(f"Ocurrió un error en def buscarEmpleadoBD: {e}")
+        print(f"Error general en buscarEmpleadoBD: {e}")
         return []
+
 
 
 def buscarEmpleadoUnico(id_vehiculo):
+   
     try:
-        with connectionBD() as conexion_MySQLdb:
-            with conexion_MySQLdb.cursor(dictionary=True) as mycursor:
-                querySQL = ("""
-                        SELECT 
-                            e.id_vehiculo,
-                            e.nombre_duenio, 
-                            e.sexo_duenio,
-                            e.marca_auto,
-                            e.modelo_auto,
-                            e.factura,
-                            e.tarjeta_circulacion,
-                            e.email_duenio,
-                            e.foto_duenio
-                        FROM tbl_vehiculos AS e
-                        WHERE e.id_vehiculo =%s LIMIT 1
-                    """)
-                mycursor.execute(querySQL, (id_vehiculo,))
-                vehiculo = mycursor.fetchone()
-                return vehiculo
+        vehiculo = {}
 
+        def ejecutar_busqueda():
+            """
+            Función interna para ejecutar la búsqueda en un hilo separado.
+            """
+            nonlocal vehiculo
+            try:
+                with connectionBD() as conexion_MySQLdb:
+                    with conexion_MySQLdb.cursor(dictionary=True) as mycursor:
+                        querySQL = ("""
+                            SELECT 
+                                e.id_vehiculo,
+                                e.nombre_duenio, 
+                                e.sexo_duenio,
+                                e.marca_auto,
+                                e.modelo_auto,
+                                e.factura,
+                                e.tarjeta_circulacion,
+                                e.email_duenio,
+                                e.foto_duenio
+                            FROM tbl_vehiculos AS e
+                            WHERE e.id_vehiculo = %s LIMIT 1
+                        """)
+                        mycursor.execute(querySQL, (id_vehiculo,))
+                        vehiculo = mycursor.fetchone()
+
+                        # Aplicar el lock para asegurar la coherencia de los datos
+                        with lock:
+                            vehiculo = vehiculo if vehiculo else {}  # Si no se encuentra, se asigna un diccionario vacío
+            except Exception as e:
+                print(f"Ocurrió un error en la función buscarEmpleadoUnico: {e}")
+
+        # Crear un hilo para ejecutar la búsqueda
+        thread = threading.Thread(target=ejecutar_busqueda)
+        thread.start()
+        thread.join()  # Esperar a que el hilo termine su ejecución
+
+        return vehiculo
     except Exception as e:
-        print(f"Ocurrió un error en def buscarEmpleadoUnico: {e}")
-        return []
+        print(f"Error general en buscarEmpleadoUnico: {e}")
+        return {}
 
 
 def procesar_actualizacion_form(data):
