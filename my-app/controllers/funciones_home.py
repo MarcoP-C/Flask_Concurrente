@@ -179,7 +179,7 @@ def generarReportePDF():
 
     # Crear el archivo PDF
     fecha_actual = datetime.datetime.now()
-    archivoPDF = f"Reporte_empleados_{fecha_actual.strftime('%Y_%m_%d')}.pdf"
+    archivoPDF = f"Reporte_Vehiculos_{fecha_actual.strftime('%Y_%m_%d')}.pdf"
     carpeta_descarga = "../static/downloads-pdf"
     ruta_descarga = os.path.join(os.path.dirname(
         os.path.abspath(__file__)), carpeta_descarga)
@@ -196,33 +196,35 @@ def generarReportePDF():
     # Configurar el tamaño de la fuente y otros estilos según sea necesario
     pdf.setFont("Helvetica", 12)
 
-    # Agregar la fila de encabezado con los títulos al PDF
-    for col_num, titulo in enumerate(("Nombre", "Apellido", "Sexo", "Telefono", "Email", "Profesión", "Salario", "Fecha de Ingreso"), start=1):
-        pdf.drawString(col_num * 50, 750, titulo)
+    # Establecer las posiciones iniciales de las columnas y las filas
+    col_width = 200
+    row_height = 20
+    margin = 50
+    x = margin
+    y = 750
 
     # Agregar los registros al PDF
-    for fila_num, registro in enumerate(dataEmpleados, start=1):
-        # Obtener los datos del registro
-        nombre_empleado = registro['nombre_empleado']
-        apellido_empleado = registro['apellido_empleado']
-        sexo_empleado = registro['sexo_empleado']
-        telefono_empleado = registro['telefono_empleado']
-        email_empleado = registro['email_empleado']
-        profesion_empleado = registro['profesion_empleado']
-        salario_empleado = registro['salario_empleado']
-        fecha_registro = registro['fecha_registro']
+    for registro in dataEmpleados:
+        for titulo, valor in (("Propietario", registro['nombre_duenio']),
+                              ("Sexo", registro['sexo_duenio']),
+                              ("Marca Vehiculo", registro['marca_auto']),
+                              ("Modelo Vehiculo", registro['modelo_auto']),
+                              ("Factura", registro['factura']),
+                              ("Tarjeta de Circulacion", registro['tarjeta_circulacion']),
+                              ("Correo Electronico", registro['email_duenio']),
+                              ("Fecha de Registro", registro['fecha_registro'])):
+            pdf.drawString(x, y, f"{titulo}:")
+            pdf.drawString(x + col_width, y, f"{valor}")
+            y -= row_height
 
-        # Agregar el contenido a la posición deseada en el PDF
-        for col_num, valor in enumerate((nombre_empleado, apellido_empleado, sexo_empleado, telefono_empleado, email_empleado, profesion_empleado, salario_empleado, fecha_registro), start=1):
-            pdf.drawString(col_num * 50, (750 - fila_num * 20), str(valor))
+        # Agregar espacio entre registros
+        y -= row_height
 
     # Guardar y cerrar el PDF
     pdf.save()
 
     # Enviar el archivo PDF como respuesta HTTP
     return send_file(ruta_archivo_pdf, as_attachment=True)
-
-
 
 def buscarVehiculoBD(search):
     try:
