@@ -106,7 +106,7 @@ def sql_lista_vehiculosBD():
         return vehiculosBD
     except Exception as e:
         print(
-            f"Errro en la función sql_lista_vehiculosBD: {e}")
+            f"Error en la función sql_lista_vehiculosBD: {e}")
         return None
 
 
